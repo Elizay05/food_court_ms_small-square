@@ -1,0 +1,60 @@
+package com.example.food_court_ms_small_square.infrastructure.output.jpa.adapter;
+
+import com.example.food_court_ms_small_square.domain.model.Restaurant;
+import com.example.food_court_ms_small_square.infrastructure.output.jpa.entity.RestaurantEntity;
+import com.example.food_court_ms_small_square.infrastructure.output.jpa.mapper.IRestaurantEntityMapper;
+import com.example.food_court_ms_small_square.infrastructure.output.jpa.repository.IRestaurantRepository;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+@SpringBootTest
+public class RestaurantJpaAdapterTest {
+
+    @Mock
+    private IRestaurantRepository restaurantRepository;
+
+    @Mock
+    private IRestaurantEntityMapper restaurantEntityMapper;
+
+    @InjectMocks
+    private RestaurantJpaAdapter restaurantJpaAdapter;
+
+    @Test
+    public void saveValidRestaurantReturnsMappedModel() {
+        // Arrange
+        Restaurant restaurant = Restaurant.builder()
+                .nit("123456")
+                .nombre("Test Restaurant")
+                .direccion("Test Address")
+                .telefono("1234567890")
+                .cedulaPropietario("98765")
+                .urlLogo("http://test.com/logo.png")
+                .build();
+
+        RestaurantEntity restaurantEntity = new RestaurantEntity(
+                "123456", "98765", "Test Restaurant",
+                "Test Address", "1234567890", "http://test.com/logo.png"
+        );
+
+        when(restaurantEntityMapper.toEntity(restaurant)).thenReturn(restaurantEntity);
+        when(restaurantRepository.save(restaurantEntity)).thenReturn(restaurantEntity);
+        when(restaurantEntityMapper.toModel(restaurantEntity)).thenReturn(restaurant);
+
+        // Act
+        Restaurant result = restaurantJpaAdapter.saveRestaurant(restaurant);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(restaurant.getNit(), result.getNit());
+        assertEquals(restaurant.getNombre(), result.getNombre());
+        verify(restaurantRepository).save(restaurantEntity);
+        verify(restaurantEntityMapper).toEntity(restaurant);
+        verify(restaurantEntityMapper).toModel(restaurantEntity);
+    }
+
+}
