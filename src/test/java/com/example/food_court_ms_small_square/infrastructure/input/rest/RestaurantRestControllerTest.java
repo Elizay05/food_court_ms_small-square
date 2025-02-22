@@ -23,14 +23,7 @@ public class RestaurantRestControllerTest {
 
     @Test
     public void test_valid_restaurant_request_returns_created_status() {
-        RestaurantRequestDto requestDto = RestaurantRequestDto.builder()
-                .nit("123456789")
-                .cedulaPropietario("987654321")
-                .nombre("Test Restaurant")
-                .direccion("Test Address")
-                .telefono("+573001234567")
-                .urlLogo("http://test-logo.com")
-                .build();
+        RestaurantRequestDto requestDto = new RestaurantRequestDto("123456789", "987654321", "Test Restaurant", "Test Address","+573001234567", "http://test-logo.com");
 
         // Act
         ResponseEntity<Void> response = controller.saveObject(requestDto);

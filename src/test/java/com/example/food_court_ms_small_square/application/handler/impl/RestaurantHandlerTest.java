@@ -30,23 +30,16 @@ public class RestaurantHandlerTest {
 
     @BeforeEach
     void setUp() {
-        restaurantRequestDto = RestaurantRequestDto.builder()
-                .nit("123456789")
-                .cedulaPropietario("987654321")
-                .nombre("Mi Restaurante")
-                .direccion("Calle 123")
-                .telefono("+573001234567")
-                .urlLogo("http://logo.com/logo.png")
-                .build();
+        restaurantRequestDto = new RestaurantRequestDto("123456789", "987654321", "Mi Restaurante", "Calle 123","+573001234567","http://logo.com/logo.png");
 
-        restaurant = Restaurant.builder()
-                .nit("123456789")
-                .cedulaPropietario("987654321")
-                .nombre("Mi Restaurante")
-                .direccion("Calle 123")
-                .telefono("+573001234567")
-                .urlLogo("http://logo.com/logo.png")
-                .build();
+        restaurant = new Restaurant(
+                "123456789",
+                "987654321",
+                "Mi Restaurante",
+                "Calle 123",
+                "+573001234567",
+                "http://logo.com/logo.png"
+        );
     }
 
     @Test

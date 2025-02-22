@@ -57,4 +57,31 @@ public class RestaurantJpaAdapterTest {
         verify(restaurantEntityMapper).toModel(restaurantEntity);
     }
 
+    @Test
+    public void restaurantExistsReturnsTrueWhenRestaurantIsFound() {
+        // Arrange
+        String nit = "123456";
+        when(restaurantRepository.existsById(nit)).thenReturn(true);
+
+        // Act
+        boolean result = restaurantJpaAdapter.restaurantExists(nit);
+
+        // Assert
+        assertTrue(result);
+        verify(restaurantRepository).existsById(nit);
+    }
+
+    @Test
+    public void restaurantExistsReturnsFalseWhenRestaurantIsNotFound() {
+        // Arrange
+        String nit = "999999";
+        when(restaurantRepository.existsById(nit)).thenReturn(false);
+
+        // Act
+        boolean result = restaurantJpaAdapter.restaurantExists(nit);
+
+        // Assert
+        assertFalse(result);
+        verify(restaurantRepository).existsById(nit);
+    }
 }

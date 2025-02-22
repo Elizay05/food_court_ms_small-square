@@ -22,4 +22,6 @@ public class UserRestAdapter implements IUserValidationPersistencePort {
             return false;
         }
     }
+
+
 }

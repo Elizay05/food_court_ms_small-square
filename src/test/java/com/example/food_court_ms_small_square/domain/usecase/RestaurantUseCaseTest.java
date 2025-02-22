@@ -2,7 +2,7 @@ package com.example.food_court_ms_small_square.domain.usecase;
 
 
 import com.example.food_court_ms_small_square.domain.exception.OwnerInvalid;
-import com.example.food_court_ms_small_square.domain.exception.RestaurantAlreadyExists;
+import com.example.food_court_ms_small_square.domain.exception.ElementAlreadyExists;
 import com.example.food_court_ms_small_square.domain.model.Restaurant;
 import com.example.food_court_ms_small_square.domain.spi.IRestaurantPersistencePort;
 import com.example.food_court_ms_small_square.domain.spi.IUserValidationPersistencePort;
@@ -33,21 +33,21 @@ public class RestaurantUseCaseTest {
 
     @BeforeEach
     void setUp() {
-        restaurant = Restaurant.builder()
-                .nit("123456789")
-                .cedulaPropietario("987654321")
-                .nombre("Mi Restaurante")
-                .direccion("Calle 123")
-                .telefono("+573001234567")
-                .urlLogo("http://logo.com/logo.png")
-                .build();
+        restaurant = new Restaurant(
+                "123456789",
+                "987654321",
+                "Mi Restaurante",
+                "Calle 123",
+                "+573001234567",
+                "http://logo.com/logo.png"
+        );
     }
 
     @Test
     void shouldThrowExceptionWhenRestaurantAlreadyExists() {
         when(restaurantPersistencePort.restaurantExists(restaurant.getNit())).thenReturn(true);
 
-        RestaurantAlreadyExists exception = assertThrows(RestaurantAlreadyExists.class, () -> {
+        ElementAlreadyExists exception = assertThrows(ElementAlreadyExists.class, () -> {
             restaurantUseCase.saveRestaurant(restaurant);
         });
 
