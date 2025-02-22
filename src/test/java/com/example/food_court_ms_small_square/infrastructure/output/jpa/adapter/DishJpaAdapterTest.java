@@ -1,6 +1,7 @@
 package com.example.food_court_ms_small_square.infrastructure.output.jpa.adapter;
 
 import com.example.food_court_ms_small_square.domain.model.Dish;
+import com.example.food_court_ms_small_square.infrastructure.exception.NoSuchElementException;
 import com.example.food_court_ms_small_square.infrastructure.output.jpa.entity.DishEntity;
 import com.example.food_court_ms_small_square.infrastructure.output.jpa.mapper.IDishEntityMapper;
 import com.example.food_court_ms_small_square.infrastructure.output.jpa.repository.IDishRespository;
@@ -8,6 +9,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -91,5 +94,83 @@ public class DishJpaAdapterTest {
         // Assert
         assertFalse(result);
         verify(entityRepository).existsByNombreAndRestauranteNit(name, nit);
+    }
+
+    @Test
+    public void updateDish_updates_only_description_when_price_is_null() {
+        // Arrange
+        Long id = 1L;
+        String nuevaDescripcion = "Nueva descripción";
+        DishEntity existingDish = new DishEntity();
+        existingDish.setId(id);
+        existingDish.setDescripcion("Descripción antigua");
+        existingDish.setPrecio(15.0f);
+
+        when(entityRepository.findById(id)).thenReturn(Optional.of(existingDish));
+
+        // Act
+        adapter.updateDish(id, null, nuevaDescripcion);
+
+        // Assert
+        assertEquals(nuevaDescripcion, existingDish.getDescripcion());
+        assertEquals(15.0f, existingDish.getPrecio());
+        verify(entityRepository).save(existingDish);
+    }
+
+    @Test
+    public void updateDish_updates_only_price_when_description_is_null() {
+        // Arrange
+        Long id = 1L;
+        Float nuevoPrecio = 20.0f;
+        DishEntity existingDish = new DishEntity();
+        existingDish.setId(id);
+        existingDish.setDescripcion("Descripción antigua");
+        existingDish.setPrecio(15.0f);
+
+        when(entityRepository.findById(id)).thenReturn(Optional.of(existingDish));
+
+        // Act
+        adapter.updateDish(id, nuevoPrecio, null);
+
+        // Assert
+        assertEquals(nuevoPrecio, existingDish.getPrecio());
+        assertEquals("Descripción antigua", existingDish.getDescripcion());
+        verify(entityRepository).save(existingDish);
+    }
+
+    @Test
+    public void updateDish_updates_both_price_and_description() {
+        // Arrange
+        Long id = 1L;
+        Float nuevoPrecio = 20.0f;
+        String nuevaDescripcion = "Nueva descripción";
+        DishEntity existingDish = new DishEntity();
+        existingDish.setId(id);
+        existingDish.setDescripcion("Descripción antigua");
+        existingDish.setPrecio(15.0f);
+
+        when(entityRepository.findById(id)).thenReturn(Optional.of(existingDish));
+
+        // Act
+        adapter.updateDish(id, nuevoPrecio, nuevaDescripcion);
+
+        // Assert
+        assertEquals(nuevaDescripcion, existingDish.getDescripcion());
+        assertEquals(nuevoPrecio, existingDish.getPrecio());
+        verify(entityRepository).save(existingDish);
+    }
+
+    @Test
+    public void updateDish_throws_exception_when_dish_not_found() {
+        // Arrange
+        Long id = 99L;
+        when(entityRepository.findById(id)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(NoSuchElementException.class, () -> {
+            adapter.updateDish(id, 25.0f, "Nueva descripción");
+        });
+
+        verify(entityRepository, never()).save(any());
     }
 }

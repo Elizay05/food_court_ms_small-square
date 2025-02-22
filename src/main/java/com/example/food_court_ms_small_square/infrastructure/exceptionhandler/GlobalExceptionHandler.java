@@ -1,7 +1,9 @@
 package com.example.food_court_ms_small_square.infrastructure.exceptionhandler;
 
-import com.example.food_court_ms_small_square.domain.exception.OwnerInvalid;
-import com.example.food_court_ms_small_square.domain.exception.ElementAlreadyExists;
+import com.example.food_court_ms_small_square.domain.exception.InvalidArgumentsException;
+import com.example.food_court_ms_small_square.domain.exception.OwnerInvalidException;
+import com.example.food_court_ms_small_square.domain.exception.ElementAlreadyExistsException;
+import com.example.food_court_ms_small_square.infrastructure.exception.NoSuchElementException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -24,14 +26,26 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
     }
 
-    @ExceptionHandler(ElementAlreadyExists.class)
-    public ResponseEntity<ExceptionResponse> handleRestaurantAlreadyExists(ElementAlreadyExists ex) {
+    @ExceptionHandler(ElementAlreadyExistsException.class)
+    public ResponseEntity<ExceptionResponse> handleRestaurantAlreadyExists(ElementAlreadyExistsException ex) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(ex.getMessage(), HttpStatus.CONFLICT.toString(), LocalDateTime.now());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(exceptionResponse);
     }
 
-    @ExceptionHandler(OwnerInvalid.class)
-    public ResponseEntity<ExceptionResponse> handleOwnerInvalid(OwnerInvalid ex) {
+    @ExceptionHandler(OwnerInvalidException.class)
+    public ResponseEntity<ExceptionResponse> handleOwnerInvalid(OwnerInvalidException ex) {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(ex.getMessage(), HttpStatus.BAD_REQUEST.toString(), LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
+    }
+
+    @ExceptionHandler(NoSuchElementException.class)
+    public ResponseEntity<ExceptionResponse> handleNoSuchElementException(NoSuchElementException ex) {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(ex.getMessage(), HttpStatus.BAD_REQUEST.toString(), LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
+    }
+
+    @ExceptionHandler(InvalidArgumentsException.class)
+    public ResponseEntity<ExceptionResponse> handleInvalidArgumentsException(InvalidArgumentsException ex) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(ex.getMessage(), HttpStatus.BAD_REQUEST.toString(), LocalDateTime.now());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
     }

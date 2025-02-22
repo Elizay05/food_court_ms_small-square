@@ -72,7 +72,7 @@ public class DishHanlerTest {
     public void test_update_dish_with_null_request() {
 
         // Act & Assert
-        assertThrows(NullPointerException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             dishHandler.updateDish(null);
         });
 
