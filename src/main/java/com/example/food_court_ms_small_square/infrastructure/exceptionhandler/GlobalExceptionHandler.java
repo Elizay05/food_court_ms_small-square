@@ -1,7 +1,7 @@
 package com.example.food_court_ms_small_square.infrastructure.exceptionhandler;
 
 import com.example.food_court_ms_small_square.domain.exception.OwnerInvalid;
-import com.example.food_court_ms_small_square.domain.exception.RestaurantAlreadyExists;
+import com.example.food_court_ms_small_square.domain.exception.ElementAlreadyExists;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -24,8 +24,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
     }
 
-    @ExceptionHandler(RestaurantAlreadyExists.class)
-    public ResponseEntity<ExceptionResponse> handleRestaurantAlreadyExists(RestaurantAlreadyExists ex) {
+    @ExceptionHandler(ElementAlreadyExists.class)
+    public ResponseEntity<ExceptionResponse> handleRestaurantAlreadyExists(ElementAlreadyExists ex) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(ex.getMessage(), HttpStatus.CONFLICT.toString(), LocalDateTime.now());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(exceptionResponse);
     }

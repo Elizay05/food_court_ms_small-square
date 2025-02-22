@@ -1,7 +1,7 @@
 package com.example.food_court_ms_small_square.infrastructure.exceptionhandler;
 
 import com.example.food_court_ms_small_square.domain.exception.OwnerInvalid;
-import com.example.food_court_ms_small_square.domain.exception.RestaurantAlreadyExists;
+import com.example.food_court_ms_small_square.domain.exception.ElementAlreadyExists;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -44,8 +44,8 @@ public class GlobalExceptionHandlerTest {
     }
 
     @Test
-    void shouldHandleRestaurantAlreadyExistsException() {
-        RestaurantAlreadyExists exception = new RestaurantAlreadyExists("The restaurant already exists");
+    void shouldHandleElementAlreadyExistsException() {
+        ElementAlreadyExists exception = new ElementAlreadyExists("The restaurant already exists");
 
         ResponseEntity<ExceptionResponse> response = globalExceptionHandler.handleRestaurantAlreadyExists(exception);
 

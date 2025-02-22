@@ -27,14 +27,14 @@ public class RestaurantJpaAdapterTest {
     @Test
     public void saveValidRestaurantReturnsMappedModel() {
         // Arrange
-        Restaurant restaurant = Restaurant.builder()
-                .nit("123456")
-                .nombre("Test Restaurant")
-                .direccion("Test Address")
-                .telefono("1234567890")
-                .cedulaPropietario("98765")
-                .urlLogo("http://test.com/logo.png")
-                .build();
+        Restaurant restaurant = new Restaurant(
+                "123456",
+                "98765",
+                "Test Restaurant",
+                "Test Address",
+                "1234567890",
+                "http://test.com/logo.png"
+        );
 
         RestaurantEntity restaurantEntity = new RestaurantEntity(
                 "123456", "98765", "Test Restaurant",
