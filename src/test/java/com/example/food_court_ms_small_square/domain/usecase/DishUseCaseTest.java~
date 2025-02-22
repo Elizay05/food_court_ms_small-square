@@ -1,5 +1,6 @@
 package com.example.food_court_ms_small_square.domain.usecase;
 
+import com.example.food_court_ms_small_square.domain.exception.ElementAlreadyExistsException;
 import com.example.food_court_ms_small_square.domain.exception.InvalidArgumentsException;
 import com.example.food_court_ms_small_square.domain.model.Dish;
 import com.example.food_court_ms_small_square.domain.spi.IDishPersistencePort;

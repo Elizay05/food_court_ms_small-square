@@ -49,12 +49,12 @@ public class BeanConfiguration {
     }
 
     @Bean
-    public IUserPersistencePort userPersistencePort() {
-        return new UserJpaAdapter(userEntityMapper, userRepository,rolRepository, entityMapper);
+    public IDishPersistencePort dishPersistencePort() {
+        return new DishJpaAdapter(dishEntityMapper, dishRepository);
     }
 
     @Bean
-    public IUserServicePort userServicePort() {
-        return new UserCase(userPersistencePort(), passwordEncryptionPort);
+    public IDishServicePort dishServicePort() {
+        return new DishUseCase(dishPersistencePort());
     }
 }

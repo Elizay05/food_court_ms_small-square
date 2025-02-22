@@ -25,7 +25,6 @@ public class DishRestController {
     }
 
     @PutMapping("/update")
-    @PreAuthorize("hasRole('ROLE_Owner')")
     public ResponseEntity<Void> updateDish(@RequestBody @Valid UpdateDishRequestDto updateDishRequestDto) {
         dishHandler.updateDish(updateDishRequestDto);
         return new ResponseEntity<>(HttpStatus.ACCEPTED);

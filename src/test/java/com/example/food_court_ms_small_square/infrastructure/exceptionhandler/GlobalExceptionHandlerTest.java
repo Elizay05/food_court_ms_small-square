@@ -73,9 +73,9 @@ public class GlobalExceptionHandlerTest {
 
         ResponseEntity<ExceptionResponse> response = globalExceptionHandler.handleNoSuchElementException(exception);
 
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertEquals("El plato no existe.", response.getBody().getMessage());
-        assertEquals(HttpStatus.BAD_REQUEST.toString(), response.getBody().getStatus());
+        assertEquals(HttpStatus.NOT_FOUND.toString(), response.getBody().getStatus());
     }
 
     @Test
