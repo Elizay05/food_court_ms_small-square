@@ -1,8 +1,11 @@
 package com.example.food_court_ms_small_square.infrastructure.input.rest;
 
 import com.example.food_court_ms_small_square.application.dto.request.DishRequestDto;
+import com.example.food_court_ms_small_square.application.dto.request.UpdateDishRequestDto;
 import com.example.food_court_ms_small_square.application.handler.IDishHandler;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +15,12 @@ import static org.mockito.Mockito.*;
 
 @SpringBootTest
 public class DishRestControllerTest {
+
+    @Mock
+    private IDishHandler dishHandler;
+
+    @InjectMocks
+    private DishRestController dishRestController;
 
     @Test
     public void test_valid_dish_request_returns_created_status() {
@@ -25,14 +34,24 @@ public class DishRestControllerTest {
                 "123456789"
         );
 
-        IDishHandler dishHandler = mock(IDishHandler.class);
-        DishRestController dishRestController = new DishRestController(dishHandler);
-
         // Act
         ResponseEntity<Void> response = dishRestController.saveDish(dishRequestDto);
 
         // Assert
         verify(dishHandler).saveDish(dishRequestDto);
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
+    }
+
+    @Test
+    public void test_valid_update_request_returns_accepted() {
+        // Arrange
+        UpdateDishRequestDto updateRequest = new UpdateDishRequestDto(1, 15.99f, "Updated description");
+
+        // Act
+        ResponseEntity<Void> response = dishRestController.updateDish(updateRequest);
+
+        // Assert
+        verify(dishHandler).updateDish(updateRequest);
+        assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
     }
 }

@@ -1,8 +1,8 @@
 package com.example.food_court_ms_small_square.domain.usecase;
 
 
-import com.example.food_court_ms_small_square.domain.exception.OwnerInvalidException;
-import com.example.food_court_ms_small_square.domain.exception.ElementAlreadyExistsException;
+import com.example.food_court_ms_small_square.domain.exception.OwnerInvalid;
+import com.example.food_court_ms_small_square.domain.exception.ElementAlreadyExists;
 import com.example.food_court_ms_small_square.domain.model.Restaurant;
 import com.example.food_court_ms_small_square.domain.spi.IRestaurantPersistencePort;
 import com.example.food_court_ms_small_square.domain.spi.IUserValidationPersistencePort;
@@ -47,7 +47,7 @@ public class RestaurantUseCaseTest {
     void shouldThrowExceptionWhenRestaurantAlreadyExists() {
         when(restaurantPersistencePort.restaurantExists(restaurant.getNit())).thenReturn(true);
 
-        ElementAlreadyExistsException exception = assertThrows(ElementAlreadyExistsException.class, () -> {
+        ElementAlreadyExists exception = assertThrows(ElementAlreadyExists.class, () -> {
             restaurantUseCase.saveRestaurant(restaurant);
         });
 
@@ -61,7 +61,7 @@ public class RestaurantUseCaseTest {
         when(restaurantPersistencePort.restaurantExists(restaurant.getNit())).thenReturn(false);
         when(userValidationPersistencePort.isValidOwner(restaurant.getCedulaPropietario())).thenReturn(false);
 
-        OwnerInvalidException exception = assertThrows(OwnerInvalidException.class, () -> {
+        OwnerInvalid exception = assertThrows(OwnerInvalid.class, () -> {
             restaurantUseCase.saveRestaurant(restaurant);
         });
 

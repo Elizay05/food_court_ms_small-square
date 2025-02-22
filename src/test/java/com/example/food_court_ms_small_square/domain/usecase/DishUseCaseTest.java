@@ -1,6 +1,7 @@
 package com.example.food_court_ms_small_square.domain.usecase;
 
-import com.example.food_court_ms_small_square.domain.exception.ElementAlreadyExists;
+import com.example.food_court_ms_small_square.domain.exception.ElementAlreadyExistsException;
+import com.example.food_court_ms_small_square.domain.exception.InvalidArgumentsException;
 import com.example.food_court_ms_small_square.domain.model.Dish;
 import com.example.food_court_ms_small_square.domain.spi.IDishPersistencePort;
 import org.junit.jupiter.api.Test;
@@ -59,7 +60,7 @@ public class DishUseCaseTest {
         when(dishPersistencePort.dishExists(dish.getNombre(), dish.getRestauranteNit())).thenReturn(true);
 
         // Act & Assert
-        assertThrows(ElementAlreadyExists.class, () -> dishUseCase.saveDish(dish));
+        assertThrows(ElementAlreadyExistsException.class, () -> dishUseCase.saveDish(dish));
 
         verify(dishPersistencePort, never()).saveDish(any());
     }
@@ -72,6 +73,30 @@ public class DishUseCaseTest {
         });
 
         verify(dishPersistencePort, never()).saveDish(any());
+    }
+
+    @Test
+    public void test_update_dish_with_valid_price_and_description() {
+        Long id = 1L;
+        Float price = 10.5F;
+        String description = "New description";
+
+        // Act
+        dishUseCase.updateDish(id, price, description);
+
+        // Assert
+        verify(dishPersistencePort).updateDish(id, price, description);
+    }
+
+    @Test
+    public void test_update_dish_with_null_price_and_description() {
+        Long id = 1L;
+
+        // Act & Assert
+        assertThrows(InvalidArgumentsException.class, () -> {
+            dishUseCase.updateDish(id, null, null);
+        });
+        verify(dishPersistencePort, never()).updateDish(any(), any(), any());
     }
 }
 
