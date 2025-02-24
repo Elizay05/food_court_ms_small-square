@@ -32,4 +32,19 @@ public class RestaurantRestControllerTest {
         verify(restaurantHandler).saveRestaurant(requestDto);
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
     }
+
+    @Test
+    public void test_validate_nit_with_owner_role_returns_ok() {
+        // Arrange
+        String expectedNit = "123456789";
+        when(restaurantHandler.validateNit()).thenReturn(expectedNit);
+
+        // Act
+        ResponseEntity<String> response = controller.validateNit();
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(expectedNit, response.getBody());
+        verify(restaurantHandler).validateNit();
+    }
 }

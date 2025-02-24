@@ -5,4 +5,5 @@ import com.example.food_court_ms_small_square.application.dto.request.Restaurant
 public interface IRestaurantHandler {
 
     void saveRestaurant(RestaurantRequestDto restaurantRequestDto);
+    String validateNit();
 }

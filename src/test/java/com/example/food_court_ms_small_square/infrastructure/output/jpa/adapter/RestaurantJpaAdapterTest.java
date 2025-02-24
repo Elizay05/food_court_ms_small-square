@@ -1,6 +1,7 @@
 package com.example.food_court_ms_small_square.infrastructure.output.jpa.adapter;
 
 import com.example.food_court_ms_small_square.domain.model.Restaurant;
+import com.example.food_court_ms_small_square.infrastructure.configuration.security.CustomUserDetails;
 import com.example.food_court_ms_small_square.infrastructure.output.jpa.entity.RestaurantEntity;
 import com.example.food_court_ms_small_square.infrastructure.output.jpa.mapper.IRestaurantEntityMapper;
 import com.example.food_court_ms_small_square.infrastructure.output.jpa.repository.IRestaurantRepository;
@@ -8,6 +9,11 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+
+import java.util.Collections;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -83,5 +89,31 @@ public class RestaurantJpaAdapterTest {
         // Assert
         assertFalse(result);
         verify(restaurantRepository).existsById(nit);
+    }
+
+    @Test
+    public void test_validate_nit_returns_nit_when_restaurant_found() {
+        // Arrange
+        String documentNumber = "123456789";
+        String expectedNit = "987654321";
+
+        RestaurantEntity restaurant = new RestaurantEntity();
+        restaurant.setNit(expectedNit);
+        restaurant.setCedulaPropietario(documentNumber);
+
+        Authentication authentication = mock(Authentication.class);
+        CustomUserDetails userDetails = new CustomUserDetails("username", documentNumber, Collections.emptyList());
+
+        when(authentication.getPrincipal()).thenReturn(userDetails);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        when(restaurantRepository.findByCedulaPropietario(documentNumber))
+                .thenReturn(Optional.of(restaurant));
+
+        // Act
+        String actualNit = restaurantJpaAdapter.validateNit();
+
+        // Assert
+        assertEquals(expectedNit, actualNit);
     }
 }

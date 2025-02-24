@@ -23,6 +23,12 @@ public class RestaurantUseCase implements IRestaurantServicePort {
             throw new OwnerInvalidException("El propietario no es valido");
         }
 
+        userValidationPersistencePort.updateNit(restaurant.getCedulaPropietario(), restaurant.getNit());
         restaurantPersistencePort.saveRestaurant(restaurant);
+    }
+
+    @Override
+    public String validateNit(){
+        return restaurantPersistencePort.validateNit();
     }
 }

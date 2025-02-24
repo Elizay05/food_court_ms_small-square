@@ -12,8 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -78,5 +77,26 @@ public class RestaurantUseCaseTest {
         restaurantUseCase.saveRestaurant(restaurant);
 
         verify(restaurantPersistencePort).saveRestaurant(restaurant);
+    }
+
+    @Test
+    public void test_validate_nit_returns_valid_string() {
+        String expectedNit = "123456789";
+        when(restaurantPersistencePort.validateNit()).thenReturn(expectedNit);
+
+        String actualNit = restaurantUseCase.validateNit();
+
+        assertEquals(expectedNit, actualNit);
+        verify(restaurantPersistencePort).validateNit();
+    }
+
+    @Test
+    public void test_validate_nit_handles_null_return() {
+        when(restaurantPersistencePort.validateNit()).thenReturn(null);
+
+        String actualNit = restaurantUseCase.validateNit();
+
+        assertNull(actualNit);
+        verify(restaurantPersistencePort).validateNit();
     }
 }
