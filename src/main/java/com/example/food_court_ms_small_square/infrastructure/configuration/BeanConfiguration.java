@@ -14,6 +14,7 @@ import com.example.food_court_ms_small_square.infrastructure.output.jpa.mapper.I
 import com.example.food_court_ms_small_square.infrastructure.output.jpa.repository.IDishRespository;
 import com.example.food_court_ms_small_square.infrastructure.output.jpa.repository.IRestaurantRepository;
 import com.example.food_court_ms_small_square.infrastructure.output.rest.UserRestAdapter;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,8 +35,8 @@ public class BeanConfiguration {
     }
 
     @Bean
-    public IUserValidationPersistencePort userValidationPersistencePort(RestTemplate restTemplate) {
-        return new UserRestAdapter(restTemplate);
+    public IUserValidationPersistencePort userValidationPersistencePort(RestTemplate restTemplate, HttpServletRequest httpServletRequest) {
+        return new UserRestAdapter(restTemplate, httpServletRequest);
     }
 
     @Bean

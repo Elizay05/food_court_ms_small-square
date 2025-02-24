@@ -22,4 +22,9 @@ public class RestaurantHandler implements IRestaurantHandler {
         Restaurant restaurant = restaurantRequestMapper.toRestaurant(restaurantRequestDto);
         restaurantServicePort.saveRestaurant(restaurant);
     }
+
+    @Override
+    public String validateNit(){
+        return restaurantServicePort.validateNit();
+    }
 }

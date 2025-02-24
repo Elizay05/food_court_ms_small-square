@@ -5,4 +5,5 @@ import com.example.food_court_ms_small_square.domain.model.Restaurant;
 public interface IRestaurantServicePort {
 
     void saveRestaurant(Restaurant restaurant);
+    String validateNit();
 }

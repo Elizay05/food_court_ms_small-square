@@ -11,10 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/restaurant")
@@ -45,5 +42,31 @@ public class RestaurantRestController {
     public ResponseEntity<Void> saveObject(@RequestBody @Valid RestaurantRequestDto restaurantRequestDto) {
         restaurantHandler.saveRestaurant(restaurantRequestDto);
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @Operation(
+            summary = "Validate NIT",
+            description = "Retrieves the NIT of the restaurant associated with the authenticated owner."
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "NIT successfully retrieved",
+            content = @Content(mediaType = "application/json", schema = @Schema(type = "string"))
+    )
+    @ApiResponse(
+            responseCode = "403",
+            description = "Forbidden - The user does not have permission",
+            content = @Content(mediaType = "application/json")
+    )
+    @ApiResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content(mediaType = "application/json")
+    )
+    @GetMapping("/validateNit")
+    @PreAuthorize("hasRole('ROLE_Owner')")
+    public ResponseEntity<String> validateNit() {
+        String nit = restaurantHandler.validateNit();
+        return ResponseEntity.ok(nit);
     }
 }

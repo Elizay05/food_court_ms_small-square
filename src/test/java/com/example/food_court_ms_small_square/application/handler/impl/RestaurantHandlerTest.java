@@ -10,6 +10,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -50,5 +52,26 @@ public class RestaurantHandlerTest {
 
         verify(restaurantRequestMapper).toRestaurant(restaurantRequestDto);
         verify(restaurantServicePort).saveRestaurant(restaurant);
+    }
+
+    @Test
+    public void validate_nit_returns_service_result() {
+        String expectedResult = "123456789";
+        when(restaurantServicePort.validateNit()).thenReturn(expectedResult);
+
+        String result = restaurantHandler.validateNit();
+
+        assertEquals(expectedResult, result);
+        verify(restaurantServicePort).validateNit();
+    }
+
+    @Test
+    public void validate_nit_handles_null_response() {
+        when(restaurantServicePort.validateNit()).thenReturn(null);
+
+        String result = restaurantHandler.validateNit();
+
+        assertNull(result);
+        verify(restaurantServicePort).validateNit();
     }
 }

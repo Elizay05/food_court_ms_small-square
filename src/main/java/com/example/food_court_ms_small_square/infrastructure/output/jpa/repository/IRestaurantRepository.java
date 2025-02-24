@@ -3,6 +3,8 @@ package com.example.food_court_ms_small_square.infrastructure.output.jpa.reposit
 import com.example.food_court_ms_small_square.infrastructure.output.jpa.entity.RestaurantEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Optional;
+
 public interface IRestaurantRepository extends JpaRepository<RestaurantEntity, String> {
-    RestaurantEntity findByCedulaPropietario(String ownerDni);
+    Optional<RestaurantEntity> findByCedulaPropietario(String ownerDni);
 }

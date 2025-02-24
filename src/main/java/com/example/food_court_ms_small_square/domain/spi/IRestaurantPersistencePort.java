@@ -4,6 +4,6 @@ import com.example.food_court_ms_small_square.domain.model.Restaurant;
 
 public interface IRestaurantPersistencePort {
     Restaurant saveRestaurant(Restaurant restaurant);
-
     Boolean restaurantExists(String nit);
+    String validateNit();
 }
