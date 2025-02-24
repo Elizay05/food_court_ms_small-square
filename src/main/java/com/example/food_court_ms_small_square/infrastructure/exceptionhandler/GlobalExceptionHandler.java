@@ -4,6 +4,7 @@ import com.example.food_court_ms_small_square.domain.exception.InvalidArgumentsE
 import com.example.food_court_ms_small_square.domain.exception.OwnerInvalidException;
 import com.example.food_court_ms_small_square.domain.exception.ElementAlreadyExistsException;
 import com.example.food_court_ms_small_square.infrastructure.exception.NoSuchElementException;
+import com.example.food_court_ms_small_square.infrastructure.exception.UnauthorizedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -40,13 +41,19 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(NoSuchElementException.class)
     public ResponseEntity<ExceptionResponse> handleNoSuchElementException(NoSuchElementException ex) {
-        ExceptionResponse exceptionResponse = new ExceptionResponse(ex.getMessage(), HttpStatus.BAD_REQUEST.toString(), LocalDateTime.now());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
+        ExceptionResponse exceptionResponse = new ExceptionResponse(ex.getMessage(), HttpStatus.NOT_FOUND.toString(), LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse);
     }
 
     @ExceptionHandler(InvalidArgumentsException.class)
     public ResponseEntity<ExceptionResponse> handleInvalidArgumentsException(InvalidArgumentsException ex) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(ex.getMessage(), HttpStatus.BAD_REQUEST.toString(), LocalDateTime.now());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
+    }
+
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ExceptionResponse> handleUnauthorizedException(UnauthorizedException ex) {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(ex.getMessage(), HttpStatus.UNAUTHORIZED.toString(), LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(exceptionResponse);
     }
 }

@@ -15,8 +15,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.util.Optional;
-
 @RequiredArgsConstructor
 public class DishJpaAdapter implements IDishPersistencePort {
 
@@ -54,16 +52,6 @@ public class DishJpaAdapter implements IDishPersistencePort {
     public void updateDish(Long id, Float precio, String descripcion) {
         DishEntity dishEntity = dishRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("El plato no existe."));
-
-        Optional<RestaurantEntity> restaurantEntity = restaurantRepository.findById(dishEntity.getRestauranteNit());
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-        String documentNumber = userDetails.getDocumentNumber();
-
-        if (!restaurantEntity.get().getCedulaPropietario().equals(documentNumber)) {
-            throw new UnauthorizedException("No tienes permisos para actualizar un plato en este restaurante");
-        }
 
         if (descripcion != null) {
             dishEntity.setDescripcion(descripcion);

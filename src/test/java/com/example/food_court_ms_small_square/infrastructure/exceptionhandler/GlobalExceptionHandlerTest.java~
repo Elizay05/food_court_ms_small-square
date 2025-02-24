@@ -1,5 +1,6 @@
 package com.example.food_court_ms_small_square.infrastructure.exceptionhandler;
 
+import com.example.food_court_ms_small_square.domain.exception.InvalidArgumentsException;
 import com.example.food_court_ms_small_square.domain.exception.OwnerInvalidException;
 import com.example.food_court_ms_small_square.domain.exception.ElementAlreadyExistsException;
 import com.example.food_court_ms_small_square.infrastructure.exception.NoSuchElementException;
@@ -74,6 +75,17 @@ public class GlobalExceptionHandlerTest {
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals("El plato no existe.", response.getBody().getMessage());
+        assertEquals(HttpStatus.BAD_REQUEST.toString(), response.getBody().getStatus());
+    }
+
+    @Test
+    void shouldHandleInvalidArgumentsException() {
+        InvalidArgumentsException exception = new InvalidArgumentsException("Debe proporcionar al menos un campo para actualizar.");
+
+        ResponseEntity<ExceptionResponse> response = globalExceptionHandler.handleInvalidArgumentsException(exception);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("Debe proporcionar al menos un campo para actualizar.", response.getBody().getMessage());
         assertEquals(HttpStatus.BAD_REQUEST.toString(), response.getBody().getStatus());
     }
 }
