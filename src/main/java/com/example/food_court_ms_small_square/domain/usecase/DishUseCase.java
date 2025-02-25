@@ -5,6 +5,10 @@ import com.example.food_court_ms_small_square.domain.exception.InvalidArgumentsE
 import com.example.food_court_ms_small_square.domain.model.Dish;
 import com.example.food_court_ms_small_square.domain.spi.IDishPersistencePort;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 @RequiredArgsConstructor
 public class DishUseCase implements IDishServicePort {
@@ -28,5 +32,11 @@ public class DishUseCase implements IDishServicePort {
     @Override
     public void updateDishStatus(Long id, Boolean enabled) {
         dishPersistencePort.updateDishStatus(id, enabled);
+    }
+
+    @Override
+    public Page<Dish> listDishes(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("nombre").ascending());
+        return dishPersistencePort.listDishes(pageable);
     }
 }

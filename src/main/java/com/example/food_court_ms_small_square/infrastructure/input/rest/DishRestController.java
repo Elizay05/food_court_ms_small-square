@@ -3,6 +3,7 @@ package com.example.food_court_ms_small_square.infrastructure.input.rest;
 import com.example.food_court_ms_small_square.application.dto.request.DishRequestDto;
 import com.example.food_court_ms_small_square.application.dto.request.UpdateDishRequestDto;
 import com.example.food_court_ms_small_square.application.dto.request.UpdateDishStatusRequestDto;
+import com.example.food_court_ms_small_square.application.dto.response.DishResponseDto;
 import com.example.food_court_ms_small_square.application.handler.IDishHandler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -10,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -105,5 +107,23 @@ public class DishRestController {
     ) {
         dishHandler.updateDishStatus(id, updateDishStatusRequestDto);
         return ResponseEntity.accepted().build();
+    }
+
+
+    @Operation(
+            summary = "List all dishes",
+            description = "Returns a paginated and sorted list of dishes"
+    )
+    @ApiResponse(responseCode = "200", description = "Dishes successfully retrieved")
+    @ApiResponse(responseCode = "500", description = "Internal server error",
+            content = @Content(mediaType = "application/json"))
+    @GetMapping("/list")
+    @PreAuthorize("hasRole('ROLE_Customer')")
+    public ResponseEntity<Page<DishResponseDto>> listDishes(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Page<DishResponseDto> dishses = dishHandler.listDishes(page, size);
+        return ResponseEntity.ok(dishses);
     }
 }

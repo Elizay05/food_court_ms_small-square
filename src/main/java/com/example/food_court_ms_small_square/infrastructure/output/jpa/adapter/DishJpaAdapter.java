@@ -12,6 +12,8 @@ import com.example.food_court_ms_small_square.infrastructure.output.jpa.mapper.I
 import com.example.food_court_ms_small_square.infrastructure.output.jpa.repository.IDishRespository;
 import com.example.food_court_ms_small_square.infrastructure.output.jpa.repository.IRestaurantRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -92,5 +94,11 @@ public class DishJpaAdapter implements IDishPersistencePort {
 
         dishEntity.setActivo(enabled);
         dishRepository.save(dishEntity);
+    }
+
+    @Override
+    public Page<Dish> listDishes(Pageable pageable) {
+        return dishRepository.findAll(pageable)
+                .map(dishEntityMapper::toDish);
     }
 }
