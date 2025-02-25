@@ -8,6 +8,8 @@ import com.example.food_court_ms_small_square.infrastructure.output.jpa.entity.R
 import com.example.food_court_ms_small_square.infrastructure.output.jpa.mapper.IRestaurantEntityMapper;
 import com.example.food_court_ms_small_square.infrastructure.output.jpa.repository.IRestaurantRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -37,5 +39,11 @@ public class RestaurantJpaAdapter implements IRestaurantPersistencePort {
         return restaurantRepository.findByCedulaPropietario(documentNumber)
                 .map(RestaurantEntity::getNit)
                 .orElseThrow(() -> new NoSuchElementException("No se encontró un restaurante con la cédula proporcionada."));
+    }
+
+    @Override
+    public Page<Restaurant> listRestaurants(Pageable pageable) {
+        return restaurantRepository.findAll(pageable)
+                .map(restaurantEntityMapper::toModel);
     }
 }

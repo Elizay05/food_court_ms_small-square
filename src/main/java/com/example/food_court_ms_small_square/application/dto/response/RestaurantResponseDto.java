@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RestaurantResponseDto {
-    private String nit;
     private String nombre;
     private String urlLogo;
 }

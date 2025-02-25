@@ -1,6 +1,7 @@
 package com.example.food_court_ms_small_square.infrastructure.input.rest;
 
 import com.example.food_court_ms_small_square.application.dto.request.RestaurantRequestDto;
+import com.example.food_court_ms_small_square.application.dto.response.RestaurantResponseDto;
 import com.example.food_court_ms_small_square.application.handler.impl.RestaurantHandler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -8,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -68,5 +70,22 @@ public class RestaurantRestController {
     public ResponseEntity<String> validateNit() {
         String nit = restaurantHandler.validateNit();
         return ResponseEntity.ok(nit);
+    }
+
+    @Operation(
+            summary = "List all restaurants",
+            description = "Returns a paginated and sorted list of restaurants"
+    )
+    @ApiResponse(responseCode = "200", description = "Restaurants successfully retrieved")
+    @ApiResponse(responseCode = "500", description = "Internal server error",
+            content = @Content(mediaType = "application/json"))
+    @GetMapping("/list")
+    @PreAuthorize("hasRole('ROLE_Customer')")
+    public ResponseEntity<Page<RestaurantResponseDto>> listRestaurants(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Page<RestaurantResponseDto> restaurants = restaurantHandler.listRestaurants(page, size);
+        return ResponseEntity.ok(restaurants);
     }
 }
