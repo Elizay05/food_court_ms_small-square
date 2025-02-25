@@ -2,6 +2,7 @@ package com.example.food_court_ms_small_square.application.handler.impl;
 
 import com.example.food_court_ms_small_square.application.dto.request.DishRequestDto;
 import com.example.food_court_ms_small_square.application.dto.request.UpdateDishRequestDto;
+import com.example.food_court_ms_small_square.application.dto.request.UpdateDishStatusRequestDto;
 import com.example.food_court_ms_small_square.application.handler.IDishHandler;
 import com.example.food_court_ms_small_square.application.mapper.IDishRequestMapper;
 import com.example.food_court_ms_small_square.domain.api.IDishServicePort;
@@ -30,6 +31,14 @@ public class DishHandler implements IDishHandler {
                 updateDishRequestDto.getId().longValue(),
                 updateDishRequestDto.getPrice(),
                 updateDishRequestDto.getDescription()
+        );
+    }
+
+    @Override
+    public void updateDishStatus(Long id, UpdateDishStatusRequestDto updateDishStatusRequestDto) {
+        dishServicePort.updateDishStatus(
+                id,
+                updateDishStatusRequestDto.getEnabled()
         );
     }
 }

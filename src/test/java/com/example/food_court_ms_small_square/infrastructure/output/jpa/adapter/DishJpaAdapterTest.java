@@ -212,4 +212,85 @@ public class DishJpaAdapterTest {
         verify(dishRepository).save(dishEntity);
         assertEquals(20.0f, dishEntity.getPrecio());
     }
+
+    @Test
+    public void test_update_dish_status_success_when_owner_updates_own_dish() {
+        // Arrange
+        Long dishId = 1L;
+        Boolean enabled = true;
+        String ownerDocumentNumber = "123";
+        String restaurantNit = "456";
+
+        DishEntity dishEntity = new DishEntity();
+        dishEntity.setId(dishId);
+        dishEntity.setRestauranteNit(restaurantNit);
+
+        RestaurantEntity restaurantEntity = new RestaurantEntity();
+        restaurantEntity.setCedulaPropietario(ownerDocumentNumber);
+
+        Authentication authentication = mock(Authentication.class);
+        SecurityContext securityContext = mock(SecurityContext.class);
+        CustomUserDetails userDetails = new CustomUserDetails("user", ownerDocumentNumber, Collections.emptyList());
+
+        when(dishRepository.findById(dishId)).thenReturn(Optional.of(dishEntity));
+        when(restaurantRepository.findById(restaurantNit)).thenReturn(Optional.of(restaurantEntity));
+        when(authentication.getPrincipal()).thenReturn(userDetails);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+
+        // Act
+        dishJpaAdapter.updateDishStatus(dishId, enabled);
+
+        // Assert
+        verify(dishRepository).save(dishEntity);
+        assertEquals(enabled, dishEntity.getActivo());
+    }
+
+    @Test
+    public void test_update_dish_status_throws_exception_for_nonexistent_dish() {
+        // Arrange
+        Long nonExistentDishId = 999L;
+        Boolean enabled = true;
+
+        when(dishRepository.findById(nonExistentDishId)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(NoSuchElementException.class, () -> {
+            dishJpaAdapter.updateDishStatus(nonExistentDishId, enabled);
+        });
+
+        verify(dishRepository, never()).save(any(DishEntity.class));
+    }
+
+    @Test
+    public void test_update_dish_status_unauthorized_when_non_owner_attempts_update() {
+        // Arrange
+        Long dishId = 1L;
+        Boolean enabled = true;
+        String nonOwnerDocumentNumber = "789";
+        String ownerDocumentNumber = "123";
+        String restaurantNit = "456";
+
+        DishEntity dishEntity = new DishEntity();
+        dishEntity.setId(dishId);
+        dishEntity.setRestauranteNit(restaurantNit);
+
+        RestaurantEntity restaurantEntity = new RestaurantEntity();
+        restaurantEntity.setCedulaPropietario(ownerDocumentNumber);
+
+        Authentication authentication = mock(Authentication.class);
+        SecurityContext securityContext = mock(SecurityContext.class);
+        CustomUserDetails userDetails = new CustomUserDetails("user", nonOwnerDocumentNumber, Collections.emptyList());
+
+        when(dishRepository.findById(dishId)).thenReturn(Optional.of(dishEntity));
+        when(restaurantRepository.findById(restaurantNit)).thenReturn(Optional.of(restaurantEntity));
+        when(authentication.getPrincipal()).thenReturn(userDetails);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+
+        // Act & Assert
+        assertThrows(UnauthorizedException.class, () -> {
+            dishJpaAdapter.updateDishStatus(dishId, enabled);
+        });
+    }
 }

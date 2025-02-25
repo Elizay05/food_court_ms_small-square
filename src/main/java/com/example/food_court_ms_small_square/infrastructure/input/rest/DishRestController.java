@@ -2,6 +2,7 @@ package com.example.food_court_ms_small_square.infrastructure.input.rest;
 
 import com.example.food_court_ms_small_square.application.dto.request.DishRequestDto;
 import com.example.food_court_ms_small_square.application.dto.request.UpdateDishRequestDto;
+import com.example.food_court_ms_small_square.application.dto.request.UpdateDishStatusRequestDto;
 import com.example.food_court_ms_small_square.application.handler.IDishHandler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -73,5 +74,36 @@ public class DishRestController {
     public ResponseEntity<Void> updateDish(@RequestBody @Valid UpdateDishRequestDto updateDishRequestDto) {
         dishHandler.updateDish(updateDishRequestDto);
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
+    }
+
+    @Operation(
+            summary = "Enable or disable a dish",
+            description = "Updates the status of an existing dish by enabling or disabling it."
+    )
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Status update request (enabled = true to enable, false to disable)",
+            required = true,
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = UpdateDishStatusRequestDto.class)
+            )
+    )
+    @ApiResponse(responseCode = "202", description = "Dish status successfully updated")
+    @ApiResponse(responseCode = "400", description = "Validation error",
+            content = @Content(mediaType = "application/json"))
+    @ApiResponse(responseCode = "403", description = "Forbidden - User lacks necessary permissions",
+            content = @Content(mediaType = "application/json"))
+    @ApiResponse(responseCode = "404", description = "Dish not found",
+            content = @Content(mediaType = "application/json"))
+    @ApiResponse(responseCode = "500", description = "Internal server error",
+            content = @Content(mediaType = "application/json"))
+    @PatchMapping("/{id}/status")
+    @PreAuthorize("hasRole('ROLE_Owner')")
+    public ResponseEntity<Void> updateDishStatus(
+            @PathVariable Long id,
+            @RequestBody @Valid UpdateDishStatusRequestDto updateDishStatusRequestDto
+    ) {
+        dishHandler.updateDishStatus(id, updateDishStatusRequestDto);
+        return ResponseEntity.accepted().build();
     }
 }

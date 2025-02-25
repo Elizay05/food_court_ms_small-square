@@ -75,5 +75,18 @@ public class DishUseCaseTest {
         });
         verify(dishPersistencePort, never()).updateDish(any(), any(), any());
     }
+
+    @Test
+    public void test_update_dish_status_enabled_success() {
+        // Arrange
+        Long dishId = 1L;
+        Boolean enabled = true;
+
+        // Act
+        dishUseCase.updateDishStatus(dishId, enabled);
+
+        // Assert
+        verify(dishPersistencePort).updateDishStatus(dishId, enabled);
+    }
 }
 
