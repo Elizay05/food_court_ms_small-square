@@ -2,6 +2,7 @@ package com.example.food_court_ms_small_square.application.handler.impl;
 
 import com.example.food_court_ms_small_square.application.dto.request.DishRequestDto;
 import com.example.food_court_ms_small_square.application.dto.request.UpdateDishRequestDto;
+import com.example.food_court_ms_small_square.application.dto.request.UpdateDishStatusRequestDto;
 import com.example.food_court_ms_small_square.application.mapper.IDishRequestMapper;
 import com.example.food_court_ms_small_square.domain.api.IDishServicePort;
 import com.example.food_court_ms_small_square.domain.model.Category;
@@ -77,5 +78,18 @@ public class DishHanlerTest {
         });
 
         verify(dishServicePort, never()).updateDish(anyLong(), anyFloat(), anyString());
+    }
+
+    @Test
+    public void test_update_dish_status_successfully() {
+        // Arrange
+        Long dishId = 1L;
+        UpdateDishStatusRequestDto requestDto = new UpdateDishStatusRequestDto(true);
+
+        // Act
+        dishHandler.updateDishStatus(dishId, requestDto);
+
+        // Assert
+        verify(dishServicePort).updateDishStatus(dishId, true);
     }
 }

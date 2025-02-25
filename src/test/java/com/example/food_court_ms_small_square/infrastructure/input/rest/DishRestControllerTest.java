@@ -2,6 +2,7 @@ package com.example.food_court_ms_small_square.infrastructure.input.rest;
 
 import com.example.food_court_ms_small_square.application.dto.request.DishRequestDto;
 import com.example.food_court_ms_small_square.application.dto.request.UpdateDishRequestDto;
+import com.example.food_court_ms_small_square.application.dto.request.UpdateDishStatusRequestDto;
 import com.example.food_court_ms_small_square.application.handler.IDishHandler;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -52,6 +53,22 @@ public class DishRestControllerTest {
 
         // Assert
         verify(dishHandler).updateDish(updateRequest);
+        assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
+    }
+
+    @Test
+    public void test_update_dish_status_success() {
+        // Arrange
+        Long dishId = 1L;
+        UpdateDishStatusRequestDto requestDto = new UpdateDishStatusRequestDto(true);
+
+        doNothing().when(dishHandler).updateDishStatus(dishId, requestDto);
+
+        // Act
+        ResponseEntity<Void> response = dishRestController.updateDishStatus(dishId, requestDto);
+
+        // Assert
+        verify(dishHandler).updateDishStatus(dishId, requestDto);
         assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
     }
 }

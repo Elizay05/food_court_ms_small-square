@@ -6,4 +6,5 @@ public interface IDishPersistencePort {
     void saveDish(Dish dish);
     Boolean dishExists(String name, String nit);
     void updateDish(Long id, Float precio, String descripcion);
+    void updateDishStatus(Long id, Boolean enabled);
 }

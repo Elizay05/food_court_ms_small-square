@@ -74,4 +74,23 @@ public class DishJpaAdapter implements IDishPersistencePort {
 
         dishRepository.save(dishEntity);
     }
+
+    @Override
+    public void updateDishStatus(Long id, Boolean enabled) {
+        DishEntity dishEntity = dishRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("El plato no existe."));
+
+        Optional<RestaurantEntity> restaurantEntity = restaurantRepository.findById(dishEntity.getRestauranteNit());
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        String documentNumber = userDetails.getDocumentNumber();
+
+        if (!restaurantEntity.get().getCedulaPropietario().equals(documentNumber)) {
+            throw new UnauthorizedException("No tienes permisos para actualizar un plato en este restaurante");
+        }
+
+        dishEntity.setActivo(enabled);
+        dishRepository.save(dishEntity);
+    }
 }
