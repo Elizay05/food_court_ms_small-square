@@ -11,6 +11,14 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -98,5 +106,41 @@ public class RestaurantUseCaseTest {
 
         assertNull(actualNit);
         verify(restaurantPersistencePort).validateNit();
+    }
+
+    @Test
+    public void test_list_restaurants_returns_sorted_paginated_list() {
+        List<Restaurant> restaurants = Arrays.asList(
+                new Restaurant("123", "456", "Burger Place", "Address 1", "123456", "url1"),
+                new Restaurant("789", "012", "Pizza Place", "Address 2", "789012", "url2")
+        );
+
+        Page<Restaurant> expectedPage = new PageImpl<>(restaurants);
+        when(restaurantPersistencePort.listRestaurants(any(Pageable.class))).thenReturn(expectedPage);
+
+        // Act
+        Page<Restaurant> result = restaurantUseCase.listRestaurants(0, 10);
+
+        // Assert
+        verify(restaurantPersistencePort).listRestaurants(argThat(pageable ->
+                pageable.getSort().equals(Sort.by("nombre").ascending())
+        ));
+        assertEquals(expectedPage, result);
+    }
+
+    @Test
+    public void test_list_restaurants_handles_first_page() {
+        Page<Restaurant> emptyPage = new PageImpl<>(Collections.emptyList());
+        when(restaurantPersistencePort.listRestaurants(any(Pageable.class))).thenReturn(emptyPage);
+
+        // Act
+        Page<Restaurant> result = restaurantUseCase.listRestaurants(0, 5);
+
+        // Assert
+        verify(restaurantPersistencePort).listRestaurants(argThat(pageable ->
+                pageable.getPageNumber() == 0 &&
+                        pageable.getPageSize() == 5
+        ));
+        assertEquals(0, result.getNumber());
     }
 }

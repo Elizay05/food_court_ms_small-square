@@ -9,10 +9,16 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -115,5 +121,30 @@ public class RestaurantJpaAdapterTest {
 
         // Assert
         assertEquals(expectedNit, actualNit);
+    }
+
+    @Test
+    public void test_list_restaurants_returns_paginated_results() {
+        RestaurantEntity entity1 = new RestaurantEntity();
+        RestaurantEntity entity2 = new RestaurantEntity();
+        List<RestaurantEntity> entities = Arrays.asList(entity1, entity2);
+
+        Restaurant restaurant1 = new Restaurant("123", "456", "Rest1", "Address1", "123456", "logo1.jpg");
+        Restaurant restaurant2 = new Restaurant("789", "012", "Rest2", "Address2", "789012", "logo2.jpg");
+
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<RestaurantEntity> entityPage = new PageImpl<>(entities, pageable, entities.size());
+
+        when(restaurantRepository.findAll(pageable)).thenReturn(entityPage);
+        when(restaurantEntityMapper.toModel(entity1)).thenReturn(restaurant1);
+        when(restaurantEntityMapper.toModel(entity2)).thenReturn(restaurant2);
+
+        // Act
+        Page<Restaurant> result = restaurantJpaAdapter.listRestaurants(pageable);
+
+        // Assert
+        assertEquals(2, result.getContent().size());
+        verify(restaurantRepository).findAll(pageable);
+        verify(restaurantEntityMapper, times(2)).toModel(any(RestaurantEntity.class));
     }
 }

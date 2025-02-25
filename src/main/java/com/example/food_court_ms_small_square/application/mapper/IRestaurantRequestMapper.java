@@ -1,6 +1,7 @@
 package com.example.food_court_ms_small_square.application.mapper;
 
 import com.example.food_court_ms_small_square.application.dto.request.RestaurantRequestDto;
+import com.example.food_court_ms_small_square.application.dto.response.RestaurantResponseDto;
 import com.example.food_court_ms_small_square.domain.model.Restaurant;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
@@ -10,4 +11,5 @@ import org.mapstruct.ReportingPolicy;
         unmappedSourcePolicy = ReportingPolicy.IGNORE)
 public interface IRestaurantRequestMapper {
     Restaurant toRestaurant(RestaurantRequestDto restaurantRequestDto);
+    RestaurantResponseDto toResponseDto (Restaurant restaurant);
 }

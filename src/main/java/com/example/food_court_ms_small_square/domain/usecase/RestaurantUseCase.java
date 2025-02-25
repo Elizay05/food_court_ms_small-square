@@ -7,6 +7,10 @@ import com.example.food_court_ms_small_square.domain.model.Restaurant;
 import com.example.food_court_ms_small_square.domain.spi.IRestaurantPersistencePort;
 import com.example.food_court_ms_small_square.domain.spi.IUserValidationPersistencePort;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 @RequiredArgsConstructor
 public class RestaurantUseCase implements IRestaurantServicePort {
@@ -30,5 +34,11 @@ public class RestaurantUseCase implements IRestaurantServicePort {
     @Override
     public String validateNit(){
         return restaurantPersistencePort.validateNit();
+    }
+
+    @Override
+    public Page<Restaurant> listRestaurants(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("nombre").ascending());
+        return restaurantPersistencePort.listRestaurants(pageable);
     }
 }
