@@ -7,5 +7,5 @@ public interface IDishServicePort {
     void saveDish(Dish dish);
     void updateDish(Long id, Float price, String description);
     void updateDishStatus(Long id, Boolean enabled);
-    Page<Dish> listDishes(int page, int size);
+    Page<Dish> listDishesByFilters(String restauranteNit, Boolean activo, Long categoriaId, int page, int size);
 }

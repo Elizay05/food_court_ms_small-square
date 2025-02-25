@@ -1,6 +1,7 @@
 package com.example.food_court_ms_small_square.infrastructure.output.jpa.adapter;
 
 import com.example.food_court_ms_small_square.domain.exception.ElementAlreadyExistsException;
+import com.example.food_court_ms_small_square.domain.model.Category;
 import com.example.food_court_ms_small_square.domain.model.Dish;
 import com.example.food_court_ms_small_square.infrastructure.configuration.security.CustomUserDetails;
 import com.example.food_court_ms_small_square.infrastructure.exception.NoSuchElementException;
@@ -14,6 +15,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -292,5 +297,78 @@ public class DishJpaAdapterTest {
         assertThrows(UnauthorizedException.class, () -> {
             dishJpaAdapter.updateDishStatus(dishId, enabled);
         });
+    }
+
+    @Test
+    public void test_list_dishes_with_null_categoria() {
+        // Arrange
+        String restauranteNit = "123456";
+        Boolean activo = true;
+        Long categoriaId = null;
+        Pageable pageable = PageRequest.of(0, 10);
+
+        DishEntity dishEntity = new DishEntity();
+        Page<DishEntity> dishEntityPage = new PageImpl<>(Collections.singletonList(dishEntity));
+        Dish dish = new Dish(1L, "Test Dish", null, "Description", 10.0f, restauranteNit, "url", true);
+
+        when(dishRepository.findByRestauranteNitAndActivo(restauranteNit, activo, pageable))
+                .thenReturn(dishEntityPage);
+        when(dishEntityMapper.toDish(dishEntity)).thenReturn(dish);
+
+        // Act
+        Page<Dish> result = dishJpaAdapter.listDishesByFilters(restauranteNit, activo, categoriaId, pageable);
+
+        // Assert
+        verify(dishRepository).findByRestauranteNitAndActivo(restauranteNit, activo, pageable);
+        verify(dishEntityMapper).toDish(dishEntity);
+        assertEquals(1, result.getTotalElements());
+        assertEquals(dish, result.getContent().get(0));
+    }
+
+    @Test
+    public void test_list_dishes_with_categoria() {
+        String restauranteNit = "123456";
+        Boolean activo = true;
+        Long categoriaId = 1L;
+        Pageable pageable = PageRequest.of(0, 10);
+
+        DishEntity dishEntity = new DishEntity();
+        Page<DishEntity> dishEntityPage = new PageImpl<>(Collections.singletonList(dishEntity));
+        Dish dish = new Dish(1L, "Test Dish", new Category(1L, "Test Category", "Test Description"), "Description", 10.0f, restauranteNit, "url", true);
+
+        when(dishRepository.findByRestauranteNitAndActivoAndCategoriaId(restauranteNit, activo, categoriaId, pageable))
+                .thenReturn(dishEntityPage);
+        when(dishEntityMapper.toDish(dishEntity)).thenReturn(dish);
+
+        // Act
+        Page<Dish> result = dishJpaAdapter.listDishesByFilters(restauranteNit, activo, categoriaId, pageable);
+
+        // Assert
+        verify(dishRepository).findByRestauranteNitAndActivoAndCategoriaId(restauranteNit, activo, categoriaId, pageable);
+        verify(dishEntityMapper).toDish(dishEntity);
+        assertEquals(1, result.getTotalElements());
+        assertEquals(dish, result.getContent().get(0));
+    }
+
+    @Test
+    public void test_list_dishes_with_null_restaurante_nit() {
+        // Arrange
+        String restauranteNit = null;
+        Boolean activo = true;
+        Long categoriaId = null;
+        Pageable pageable = PageRequest.of(0, 10);
+
+        Page<DishEntity> emptyPage = new PageImpl<>(Collections.emptyList());
+
+        when(dishRepository.findByRestauranteNitAndActivo(restauranteNit, activo, pageable))
+                .thenReturn(emptyPage);
+
+        // Act
+        Page<Dish> result = dishJpaAdapter.listDishesByFilters(restauranteNit, activo, categoriaId, pageable);
+
+        // Assert
+        verify(dishRepository).findByRestauranteNitAndActivo(restauranteNit, activo, pageable);
+        assertTrue(result.isEmpty());
+        assertEquals(0, result.getTotalElements());
     }
 }

@@ -9,5 +9,5 @@ public interface IDishPersistencePort {
     Boolean dishExists(String name, String nit);
     void updateDish(Long id, Float precio, String descripcion);
     void updateDishStatus(Long id, Boolean enabled);
-    Page<Dish> listDishes(Pageable pageable);
+    Page<Dish> listDishesByFilters(String restauranteNit, Boolean activo, Long categoriaId, Pageable pageable);
 }

@@ -45,8 +45,8 @@ public class DishHandler implements IDishHandler {
     }
 
     @Override
-    public Page<DishResponseDto> listDishes(int page, int size) {
-        return dishServicePort.listDishes(page, size)
+    public Page<DishResponseDto> listDishesByFilters(String restauranteNit, Boolean activo, Long categoriaId, int page, int size) {
+        return dishServicePort.listDishesByFilters(restauranteNit, activo, categoriaId, page, size)
                 .map(dishRequestMapper::toResponseDto);
     }
 }

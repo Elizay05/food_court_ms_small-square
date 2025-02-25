@@ -110,20 +110,18 @@ public class DishRestController {
     }
 
 
-    @Operation(
-            summary = "List all dishes",
-            description = "Returns a paginated and sorted list of dishes"
-    )
+    @Operation(summary = "List dishes by filters", description = "Returns a paginated and sorted list of dishes filtered by restaurant and optionally by category")
     @ApiResponse(responseCode = "200", description = "Dishes successfully retrieved")
-    @ApiResponse(responseCode = "500", description = "Internal server error",
-            content = @Content(mediaType = "application/json"))
+    @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/json"))
     @GetMapping("/list")
     @PreAuthorize("hasRole('ROLE_Customer')")
     public ResponseEntity<Page<DishResponseDto>> listDishes(
+            @RequestParam String restauranteNit,
+            @RequestParam(required = false) Long categoriaId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        Page<DishResponseDto> dishses = dishHandler.listDishes(page, size);
-        return ResponseEntity.ok(dishses);
+        Page<DishResponseDto> dishes = dishHandler.listDishesByFilters(restauranteNit, true, categoriaId, page, size);
+        return ResponseEntity.ok(dishes);
     }
 }

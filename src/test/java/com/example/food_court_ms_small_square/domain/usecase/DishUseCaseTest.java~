@@ -119,5 +119,27 @@ public class DishUseCaseTest {
         assertEquals(expectedPage, result);
         verify(dishPersistencePort).listDishesByFilters(restaurantNit, active, categoryId, expectedPageable);
     }
+
+    @Test
+    public void test_list_dishes_with_negative_page() {
+        String restaurantNit = "123456";
+        Boolean active = true;
+        Long categoryId = 1L;
+        int negativePage = -1;
+        int size = 10;
+
+        Pageable expectedPageable = PageRequest.of(0, size, Sort.by("nombre").ascending());
+        Page<Dish> expectedPage = Page.empty();
+
+        when(dishPersistencePort.listDishesByFilters(restaurantNit, active, categoryId, expectedPageable))
+                .thenReturn(expectedPage);
+
+        // Act
+        Page<Dish> result = dishUseCase.listDishesByFilters(restaurantNit, active, categoryId, negativePage, size);
+
+        // Assert
+        assertEquals(expectedPage, result);
+        verify(dishPersistencePort).listDishesByFilters(restaurantNit, active, categoryId, expectedPageable);
+    }
 }
 
