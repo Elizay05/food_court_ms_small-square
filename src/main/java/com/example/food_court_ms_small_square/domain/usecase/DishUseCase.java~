@@ -35,8 +35,8 @@ public class DishUseCase implements IDishServicePort {
     }
 
     @Override
-    public Page<Dish> listDishesByFilters(String restauranteNit, Boolean activo, Long categoriaId, int page, int size) {
+    public Page<Dish> listDishes(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("nombre").ascending());
-        return dishPersistencePort.listDishesByFilters(restauranteNit, activo, categoriaId, pageable);
+        return dishPersistencePort.listDishes(pageable);
     }
 }

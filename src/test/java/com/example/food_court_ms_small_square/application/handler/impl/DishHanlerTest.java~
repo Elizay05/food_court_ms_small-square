@@ -123,35 +123,4 @@ public class DishHanlerTest {
         verify(dishServicePort).listDishesByFilters(restauranteNit, activo, categoriaId, page, size);
         verify(dishRequestMapper).toResponseDto(dish);
     }
-
-    @Test
-    public void test_list_dishes_with_null_filters() {
-        // Arrange
-        IDishServicePort dishServicePort = mock(IDishServicePort.class);
-        IDishRequestMapper dishRequestMapper = mock(IDishRequestMapper.class);
-        DishHandler dishHandler = new DishHandler(dishServicePort, dishRequestMapper);
-
-        String restauranteNit = null;
-        Boolean activo = null;
-        Long categoriaId = null;
-        int page = 0;
-        int size = 10;
-
-        Dish dish = new Dish(1L, "Pizza", null, "Delicious pizza", 12.5f, "123456", "http://image.url", true);
-        DishResponseDto dishResponseDto = new DishResponseDto();
-        Page<Dish> dishPage = new PageImpl<>(List.of(dish));
-
-        when(dishServicePort.listDishesByFilters(null, null, null, page, size))
-                .thenReturn(dishPage);
-        when(dishRequestMapper.toResponseDto(dish)).thenReturn(dishResponseDto);
-
-        // Act
-        Page<DishResponseDto> result = dishHandler.listDishesByFilters(restauranteNit, activo, categoriaId, page, size);
-
-        // Assert
-        assertNotNull(result);
-        assertEquals(1, result.getTotalElements());
-        verify(dishServicePort).listDishesByFilters(null, null, null, page, size);
-        verify(dishRequestMapper).toResponseDto(dish);
-    }
 }

@@ -1,6 +1,7 @@
 package com.example.food_court_ms_small_square.application.mapper;
 
 import com.example.food_court_ms_small_square.application.dto.request.DishRequestDto;
+import com.example.food_court_ms_small_square.application.dto.response.DishResponseDto;
 import com.example.food_court_ms_small_square.domain.model.Category;
 import com.example.food_court_ms_small_square.domain.model.Dish;
 import org.mapstruct.Mapper;
@@ -14,6 +15,8 @@ import org.mapstruct.ReportingPolicy;
 public interface IDishRequestMapper {
     @Mapping(target = "categoria", source = "categoria", qualifiedByName = "categoryFromId")
     Dish toDish(DishRequestDto dishRequestDto);
+
+    DishResponseDto toResponseDto (Dish dish);
 
     @Named("categoryFromId")
     default Category categoryFromId(Integer id) {

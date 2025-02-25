@@ -3,12 +3,14 @@ package com.example.food_court_ms_small_square.application.handler.impl;
 import com.example.food_court_ms_small_square.application.dto.request.DishRequestDto;
 import com.example.food_court_ms_small_square.application.dto.request.UpdateDishRequestDto;
 import com.example.food_court_ms_small_square.application.dto.request.UpdateDishStatusRequestDto;
+import com.example.food_court_ms_small_square.application.dto.response.DishResponseDto;
 import com.example.food_court_ms_small_square.application.handler.IDishHandler;
 import com.example.food_court_ms_small_square.application.mapper.IDishRequestMapper;
 import com.example.food_court_ms_small_square.domain.api.IDishServicePort;
 import com.example.food_court_ms_small_square.domain.model.Dish;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -40,5 +42,11 @@ public class DishHandler implements IDishHandler {
                 id,
                 updateDishStatusRequestDto.getEnabled()
         );
+    }
+
+    @Override
+    public Page<DishResponseDto> listDishesByFilters(String restauranteNit, Boolean activo, Long categoriaId, int page, int size) {
+        return dishServicePort.listDishesByFilters(restauranteNit, activo, categoriaId, page, size)
+                .map(dishRequestMapper::toResponseDto);
     }
 }

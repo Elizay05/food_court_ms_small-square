@@ -3,13 +3,18 @@ package com.example.food_court_ms_small_square.infrastructure.input.rest;
 import com.example.food_court_ms_small_square.application.dto.request.DishRequestDto;
 import com.example.food_court_ms_small_square.application.dto.request.UpdateDishRequestDto;
 import com.example.food_court_ms_small_square.application.dto.request.UpdateDishStatusRequestDto;
+import com.example.food_court_ms_small_square.application.dto.response.DishResponseDto;
 import com.example.food_court_ms_small_square.application.handler.IDishHandler;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
+import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -70,5 +75,30 @@ public class DishRestControllerTest {
         // Assert
         verify(dishHandler).updateDishStatus(dishId, requestDto);
         assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
+    }
+
+    @Test
+    public void test_list_dishes_with_valid_restaurant_nit() {
+        String validNit = "123456789";
+        int page = 0;
+        int size = 10;
+        Long categoryId = null;
+
+        Page<DishResponseDto> expectedPage = new PageImpl<>(Arrays.asList(
+                new DishResponseDto("Dish1", "Description1", 10.0f, "url1"),
+                new DishResponseDto("Dish2", "Description2", 20.0f, "url2")
+        ));
+
+        when(dishHandler.listDishesByFilters(validNit, true, categoryId, page, size))
+                .thenReturn(expectedPage);
+
+        // Act
+        ResponseEntity<Page<DishResponseDto>> response = dishRestController.listDishes(
+                validNit, categoryId, page, size);
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(expectedPage, response.getBody());
+        verify(dishHandler).listDishesByFilters(validNit, true, categoryId, page, size);
     }
 }
