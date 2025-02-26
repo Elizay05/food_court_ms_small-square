@@ -9,6 +9,5 @@ import org.springframework.data.repository.query.Param;
 public interface IOrderRepository extends JpaRepository<OrderEntity, Long> {
     int countByEstadoAndIdCliente(@Param("estado") String estado, @Param("clienteId") String clienteId);
     Page<OrderEntity> findByNitRestauranteAndEstado(String nit, String estado, Pageable pageable);
-    Page<OrderEntity> findByNitRestaurante(String nit, Pageable pageable);
 
 }

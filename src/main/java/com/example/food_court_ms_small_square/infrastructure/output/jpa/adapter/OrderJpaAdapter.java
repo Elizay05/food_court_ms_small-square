@@ -1,6 +1,8 @@
 package com.example.food_court_ms_small_square.infrastructure.output.jpa.adapter;
 
+import com.example.food_court_ms_small_square.application.dto.request.PageRequestDto;
 import com.example.food_court_ms_small_square.domain.model.Order;
+import com.example.food_court_ms_small_square.domain.model.Page;
 import com.example.food_court_ms_small_square.domain.spi.IOrderPersistencePort;
 import com.example.food_court_ms_small_square.domain.util.DomainConstants;
 import com.example.food_court_ms_small_square.infrastructure.output.jpa.entity.OrderDishEntity;
@@ -11,6 +13,7 @@ import com.example.food_court_ms_small_square.infrastructure.output.jpa.reposito
 import com.example.food_court_ms_small_square.infrastructure.output.jpa.repository.IOrderDishRepository;
 import com.example.food_court_ms_small_square.infrastructure.output.jpa.repository.IOrderRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -51,5 +54,29 @@ public class OrderJpaAdapter implements IOrderPersistencePort {
     public boolean hasActiveOrders(String clienteId) {
         return orderRepository.countByEstadoAndIdCliente(DomainConstants.ORDER_STATUS_PENDING, clienteId)
                 + orderRepository.countByEstadoAndIdCliente(DomainConstants.ORDER_STATUS_IN_PROGRESS, (clienteId)) > 0;
+    }
+
+    @Override
+    public Page<Order> listOrdersByFilters(String nit, String estado, PageRequestDto pageRequestDto) {
+        Sort sort = pageRequestDto.isAscending()
+                ? Sort.by(pageRequestDto.getSortBy()).ascending()
+                : Sort.by(pageRequestDto.getSortBy()).descending();
+
+        Pageable pageable = PageRequest.of(pageRequestDto.getPage(), pageRequestDto.getSize(), sort);
+
+        org.springframework.data.domain.Page<OrderEntity> orderEntities = (estado == null)
+                ? orderRepository.findByNitRestaurante(nit, pageable)
+                : orderRepository.findByNitRestauranteAndEstado(nit, estado, pageable);
+
+        List<Order> ordersWithDishes = orderEntities.getContent().stream()
+                .map(orderEntity -> {
+                    List<OrderDishEntity> orderDishEntities = orderDishRepository.findByOrden(orderEntity);
+                    Order mappedOrder = orderEntityMapper.toDomain(orderEntity);
+                    mappedOrder.setPlatos(orderDishEntityMapper.toDomainList(orderDishEntities));
+                    return mappedOrder;
+                })
+                .collect(Collectors.toList());
+
+        return new Page<>(ordersWithDishes, orderEntities.getTotalPages(), orderEntities.getTotalElements());
     }
 }

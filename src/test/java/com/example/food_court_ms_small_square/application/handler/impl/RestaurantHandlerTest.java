@@ -1,24 +1,24 @@
 package com.example.food_court_ms_small_square.application.handler.impl;
 
+import com.example.food_court_ms_small_square.application.dto.request.PageRequestDto;
 import com.example.food_court_ms_small_square.application.dto.request.RestaurantRequestDto;
+import com.example.food_court_ms_small_square.application.dto.response.PageResponseDto;
 import com.example.food_court_ms_small_square.application.dto.response.RestaurantResponseDto;
 import com.example.food_court_ms_small_square.application.mapper.IRestaurantRequestMapper;
 import com.example.food_court_ms_small_square.domain.api.IRestaurantServicePort;
+import com.example.food_court_ms_small_square.domain.model.Page;
 import com.example.food_court_ms_small_square.domain.model.Restaurant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -83,68 +83,51 @@ public class RestaurantHandlerTest {
     }
 
     @Test
-    public void test_list_restaurants_returns_paginated_list() {
+    public void test_list_restaurants_returns_mapped_response() {
         // Arrange
-        int page = 1;
-        int size = 10;
+        IRestaurantServicePort restaurantServicePort = mock(IRestaurantServicePort.class);
+        IRestaurantRequestMapper restaurantRequestMapper = mock(IRestaurantRequestMapper.class);
+        RestaurantHandler restaurantHandler = new RestaurantHandler(restaurantServicePort, restaurantRequestMapper);
 
-        restaurant.setNombre("Restaurant 1");
-        Restaurant restaurant2 = new Restaurant(
-                "123456789",
-                "987654321",
-                "Mi Restaurante",
-                "Calle 123",
-                "+573001234567",
-                "http://logo.com/logo.png"
+        List<Restaurant> restaurants = Arrays.asList(
+                new Restaurant("111", "222", "Restaurant 1", "CLL 123", "123456789", "logo1.jpg"),
+                new Restaurant("333", "444", "Restaurant 2", "CLL 456", "987654321", "logo2.jpg 2")
         );
-        restaurant2.setNombre("Restaurant 2");
 
-        List<Restaurant> restaurants = Arrays.asList(restaurant, restaurant2);
-        Page<Restaurant> restaurantPage = new PageImpl<>(restaurants);
+        Page<Restaurant> page = new Page<>(restaurants, 1, 2);
+        when(restaurantServicePort.listRestaurants(any(PageRequestDto.class))).thenReturn(page);
 
-        when(restaurantServicePort.listRestaurants(page, size)).thenReturn(restaurantPage);
         when(restaurantRequestMapper.toResponseDto(any(Restaurant.class)))
-                .thenAnswer(i -> {
-                    Restaurant r = i.getArgument(0);
-                    return new RestaurantResponseDto(r.getNombre(), null);
-                });
+                .thenReturn(new RestaurantResponseDto("Restaurant 1", "logo1.jpg"))
+                .thenReturn(new RestaurantResponseDto("Restaurant 2", "logo2.jpg"));
 
         // Act
-        Page<RestaurantResponseDto> result = restaurantHandler.listRestaurants(page, size);
+        PageResponseDto<RestaurantResponseDto> result = restaurantHandler.listRestaurants(0, 10);
 
         // Assert
+        assertEquals(2, result.getContent().size());
+        assertEquals(1, result.getTotalPages());
         assertEquals(2, result.getTotalElements());
         assertEquals("Restaurant 1", result.getContent().get(0).getNombre());
-        assertEquals("Restaurant 2", result.getContent().get(1).getNombre());
-
-        verify(restaurantServicePort).listRestaurants(page, size);
-        verify(restaurantRequestMapper, times(2)).toResponseDto(any(Restaurant.class));
+        assertEquals("logo2.jpg", result.getContent().get(1).getUrlLogo());
     }
 
     @Test
-    public void test_list_restaurants_handles_first_page() {
+    public void test_list_restaurants_returns_empty_response() {
         // Arrange
-        int page = 0;
-        int size = 5;
+        IRestaurantServicePort restaurantServicePort = mock(IRestaurantServicePort.class);
+        IRestaurantRequestMapper restaurantRequestMapper = mock(IRestaurantRequestMapper.class);
+        RestaurantHandler restaurantHandler = new RestaurantHandler(restaurantServicePort, restaurantRequestMapper);
 
-        restaurant.setNombre("First Restaurant");
-
-        List<Restaurant> restaurants = Collections.singletonList(restaurant);
-        Page<Restaurant> restaurantPage = new PageImpl<>(restaurants);
-
-        when(restaurantServicePort.listRestaurants(page, size)).thenReturn(restaurantPage);
-        when(restaurantRequestMapper.toResponseDto(any(Restaurant.class)))
-                .thenReturn(new RestaurantResponseDto("First Restaurant", null));
+        Page<Restaurant> emptyPage = new Page<>(Collections.emptyList(), 0, 0);
+        when(restaurantServicePort.listRestaurants(any(PageRequestDto.class))).thenReturn(emptyPage);
 
         // Act
-        Page<RestaurantResponseDto> result = restaurantHandler.listRestaurants(page, size);
+        PageResponseDto<RestaurantResponseDto> result = restaurantHandler.listRestaurants(0, 10);
 
         // Assert
-        assertEquals(0, result.getNumber());
-        assertEquals(1, result.getTotalElements());
-        assertEquals("First Restaurant", result.getContent().get(0).getNombre());
-
-        verify(restaurantServicePort).listRestaurants(page, size);
-        verify(restaurantRequestMapper).toResponseDto(any(Restaurant.class));
+        assertTrue(result.getContent().isEmpty());
+        assertEquals(0, result.getTotalPages());
+        assertEquals(0, result.getTotalElements());
     }
 }

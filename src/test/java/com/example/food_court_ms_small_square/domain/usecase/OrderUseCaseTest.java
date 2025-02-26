@@ -1,9 +1,11 @@
 package com.example.food_court_ms_small_square.domain.usecase;
 
+import com.example.food_court_ms_small_square.application.dto.request.PageRequestDto;
 import com.example.food_court_ms_small_square.domain.exception.InvalidArgumentsException;
 import com.example.food_court_ms_small_square.domain.exception.OrderInProgressException;
 import com.example.food_court_ms_small_square.domain.model.Order;
 import com.example.food_court_ms_small_square.domain.model.OrderDish;
+import com.example.food_court_ms_small_square.domain.model.Page;
 import com.example.food_court_ms_small_square.domain.spi.IOrderPersistencePort;
 import com.example.food_court_ms_small_square.domain.util.DomainConstants;
 import com.example.food_court_ms_small_square.infrastructure.configuration.security.CustomUserDetails;
@@ -15,6 +17,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -40,7 +44,7 @@ public class OrderUseCaseTest {
 
         Authentication auth = mock(Authentication.class);
         SecurityContext securityContext = mock(SecurityContext.class);
-        CustomUserDetails userDetails = new CustomUserDetails("user", "12345", Collections.emptyList());
+        CustomUserDetails userDetails = new CustomUserDetails("user", "12345", "12345", Collections.emptyList());
 
         when(securityContext.getAuthentication()).thenReturn(auth);
         when(auth.getPrincipal()).thenReturn(userDetails);
@@ -51,7 +55,7 @@ public class OrderUseCaseTest {
         when(orderPersistencePort.saveOrder(any(Order.class))).thenReturn(order);
 
         // Act
-        Order savedOrder = orderUseCase.saveOrder(order);
+        Order savedOrder = orderUseCase.saveOrder(order, "12345");
 
         // Assert
         assertNotNull(savedOrder);
@@ -68,7 +72,7 @@ public class OrderUseCaseTest {
 
         Authentication auth = mock(Authentication.class);
         SecurityContext securityContext = mock(SecurityContext.class);
-        CustomUserDetails userDetails = new CustomUserDetails("user", "12345", Collections.emptyList());
+        CustomUserDetails userDetails = new CustomUserDetails("user", "12345","12345", Collections.emptyList());
 
         when(securityContext.getAuthentication()).thenReturn(auth);
         when(auth.getPrincipal()).thenReturn(userDetails);
@@ -77,7 +81,7 @@ public class OrderUseCaseTest {
         when(orderPersistencePort.areDishesValidForRestaurant(anyList(), anyString())).thenReturn(false);
 
         // Act & Assert
-        assertThrows(InvalidArgumentsException.class, () -> orderUseCase.saveOrder(order));
+        assertThrows(InvalidArgumentsException.class, () -> orderUseCase.saveOrder(order, "12345"));
         verify(orderPersistencePort, never()).saveOrder(any(Order.class));
     }
 
@@ -89,7 +93,7 @@ public class OrderUseCaseTest {
 
         Authentication auth = mock(Authentication.class);
         SecurityContext securityContext = mock(SecurityContext.class);
-        CustomUserDetails userDetails = new CustomUserDetails("user", "12345", Collections.emptyList());
+        CustomUserDetails userDetails = new CustomUserDetails("user", "12345", "12345", Collections.emptyList());
 
         when(securityContext.getAuthentication()).thenReturn(auth);
         when(auth.getPrincipal()).thenReturn(userDetails);
@@ -99,6 +103,60 @@ public class OrderUseCaseTest {
         when(orderPersistencePort.hasActiveOrders(anyString())).thenReturn(true);
 
         // Act & Assert
-        assertThrows(OrderInProgressException.class, () -> orderUseCase.saveOrder(order));
+        assertThrows(OrderInProgressException.class, () -> orderUseCase.saveOrder(order, "12345"));
+    }
+
+    @Test
+    public void test_list_orders_with_status_filter() {
+        // Arrange
+        IOrderPersistencePort orderPersistencePort = mock(IOrderPersistencePort.class);
+        OrderUseCase orderUseCase = new OrderUseCase(orderPersistencePort);
+
+        String status = "PENDING";
+        String nit = "123456789";
+        PageRequestDto pageRequest = new PageRequestDto(0, 10, "id", true);
+
+        List<Order> orders = Arrays.asList(new Order(1L, "111", "222", LocalDateTime.now(), "PENDING", "123456789", new ArrayList<>()),
+                new Order(2L, "111", "222", LocalDateTime.now(), "PENDING", "123456789", new ArrayList<>()));
+        Page<Order> expectedPage = new Page<>(orders, 1, 2);
+
+        when(orderPersistencePort.listOrdersByFilters(nit, status, pageRequest))
+                .thenReturn(expectedPage);
+
+        // Act
+        Page<Order> result = orderUseCase.listOrdersByFilters(status, pageRequest, nit);
+
+        // Assert
+        assertEquals(expectedPage.getContent(), result.getContent());
+        assertEquals(expectedPage.getTotalPages(), result.getTotalPages());
+        assertEquals(expectedPage.getTotalElements(), result.getTotalElements());
+        verify(orderPersistencePort).listOrdersByFilters(nit, status, pageRequest);
+    }
+
+    @Test
+    public void test_list_orders_with_null_status() {
+        // Arrange
+        IOrderPersistencePort orderPersistencePort = mock(IOrderPersistencePort.class);
+        OrderUseCase orderUseCase = new OrderUseCase(orderPersistencePort);
+
+        String nit = "123456789";
+        PageRequestDto pageRequest = new PageRequestDto(0, 10, "id", true);
+
+        List<Order> orders = Arrays.asList(new Order(1L, "111", "222", LocalDateTime.now(), "PENDING", "123456789", new ArrayList<>()),
+                new Order(2L, "111", "222", LocalDateTime.now(), "PENDING", "123456789", new ArrayList<>()),
+                new Order(3L, "111", "222", LocalDateTime.now(), "PENDING", "123456789", new ArrayList<>()));
+        Page<Order> expectedPage = new Page<>(orders, 1, 3);
+
+        when(orderPersistencePort.listOrdersByFilters(nit, null, pageRequest))
+                .thenReturn(expectedPage);
+
+        // Act
+        Page<Order> result = orderUseCase.listOrdersByFilters(null, pageRequest, nit);
+
+        // Assert
+        assertEquals(expectedPage.getContent(), result.getContent());
+        assertEquals(expectedPage.getTotalPages(), result.getTotalPages());
+        assertEquals(expectedPage.getTotalElements(), result.getTotalElements());
+        verify(orderPersistencePort).listOrdersByFilters(nit, null, pageRequest);
     }
 }

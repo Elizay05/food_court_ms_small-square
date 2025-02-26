@@ -1,16 +1,17 @@
 package com.example.food_court_ms_small_square.domain.usecase;
 
+import com.example.food_court_ms_small_square.application.dto.request.PageRequestDto;
 import com.example.food_court_ms_small_square.domain.exception.InvalidArgumentsException;
-import com.example.food_court_ms_small_square.domain.model.Category;
 import com.example.food_court_ms_small_square.domain.model.Dish;
+import com.example.food_court_ms_small_square.domain.model.Page;
 import com.example.food_court_ms_small_square.domain.spi.IDishPersistencePort;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.*;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -94,30 +95,53 @@ public class DishUseCaseTest {
     }
 
     @Test
-    public void test_list_dishes_with_valid_filters() {
-        String restaurantNit = "123456";
-        Boolean active = true;
-        Long categoryId = 1L;
-        int page = 0;
-        int size = 10;
+    public void test_list_dishes_by_filters_returns_page_with_content() {
+        // Arrange
+        String restauranteNit = "123456789";
+        Boolean activo = true;
+        Long categoriaId = 1L;
+        PageRequestDto pageRequestDto = new PageRequestDto(0, 10, "name", true);
 
-        List<Dish> dishes = Arrays.asList(
-                new Dish(1L, "Dish1", new Category(1L, "Category1", "desc1"), "desc1", 10.0f, restaurantNit, "url1", true),
-                new Dish(2L, "Dish2", new Category(2L, "Category2", "desc2"), "desc2", 20.0f, restaurantNit, "url2", true)
-        );
+        List<Dish> dishes = Arrays.asList(new Dish(1L, null, null, null, null, null, null, null), new Dish(2L, null, null, null, null, null, null, null));
+        Page<Dish> expectedPage = new Page<>(dishes, 1, 2L);
 
-        Page<Dish> expectedPage = new PageImpl<>(dishes);
-        Pageable expectedPageable = PageRequest.of(page, size, Sort.by("nombre").ascending());
-
-        when(dishPersistencePort.listDishesByFilters(restaurantNit, active, categoryId, expectedPageable))
+        when(dishPersistencePort.listDishesByFilters(restauranteNit, activo, categoriaId, pageRequestDto))
                 .thenReturn(expectedPage);
 
         // Act
-        Page<Dish> result = dishUseCase.listDishesByFilters(restaurantNit, active, categoryId, page, size);
+        Page<Dish> result = dishUseCase.listDishesByFilters(restauranteNit, activo, categoriaId, pageRequestDto);
 
         // Assert
-        assertEquals(expectedPage, result);
-        verify(dishPersistencePort).listDishesByFilters(restaurantNit, active, categoryId, expectedPageable);
+        assertEquals(2, result.getContent().size());
+        assertEquals(1, result.getTotalPages());
+        assertEquals(2L, result.getTotalElements());
+
+        verify(dishPersistencePort).listDishesByFilters(restauranteNit, activo, categoriaId, pageRequestDto);
+    }
+
+    @Test
+    public void test_list_dishes_by_filters_returns_empty_page() {
+        // Arrange
+        String restauranteNit = "123456789";
+        Boolean activo = true;
+        Long categoriaId = 1L;
+        PageRequestDto pageRequestDto = new PageRequestDto(0, 10, "name", true);
+
+        List<Dish> emptyDishes = Collections.emptyList();
+        Page<Dish> emptyPage = new Page<>(emptyDishes, 0, 0L);
+
+        when(dishPersistencePort.listDishesByFilters(restauranteNit, activo, categoriaId, pageRequestDto))
+                .thenReturn(emptyPage);
+
+        // Act
+        Page<Dish> result = dishUseCase.listDishesByFilters(restauranteNit, activo, categoriaId, pageRequestDto);
+
+        // Assert
+        assertTrue(result.getContent().isEmpty());
+        assertEquals(0, result.getTotalPages());
+        assertEquals(0L, result.getTotalElements());
+
+        verify(dishPersistencePort).listDishesByFilters(restauranteNit, activo, categoriaId, pageRequestDto);
     }
 }
 

@@ -7,17 +7,23 @@ import java.util.Collection;
 
 public class CustomUserDetails implements UserDetails {
     private final String username;
-    private final String documentNumber; // Nuevo campo
+    private final String documentNumber;
+    private final String nit;
     private final Collection<? extends GrantedAuthority> authorities;
 
-    public CustomUserDetails(String username, String documentNumber, Collection<? extends GrantedAuthority> authorities) {
+    public CustomUserDetails(String username, String documentNumber, String nit, Collection<? extends GrantedAuthority> authorities) {
         this.username = username;
         this.documentNumber = documentNumber;
+        this.nit = nit;
         this.authorities = authorities;
     }
 
     public String getDocumentNumber() {
         return documentNumber;
+    }
+
+    public String getNit() {
+        return nit;
     }
 
     @Override
@@ -27,7 +33,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getPassword() {
-        return null; // No se usa en este caso
+        return null;
     }
 
     @Override

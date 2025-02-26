@@ -1,21 +1,23 @@
 package com.example.food_court_ms_small_square.application.handler.impl;
 
 import com.example.food_court_ms_small_square.application.dto.request.DishRequestDto;
+import com.example.food_court_ms_small_square.application.dto.request.PageRequestDto;
 import com.example.food_court_ms_small_square.application.dto.request.UpdateDishRequestDto;
 import com.example.food_court_ms_small_square.application.dto.request.UpdateDishStatusRequestDto;
 import com.example.food_court_ms_small_square.application.dto.response.DishResponseDto;
+import com.example.food_court_ms_small_square.application.dto.response.PageResponseDto;
 import com.example.food_court_ms_small_square.application.mapper.IDishRequestMapper;
 import com.example.food_court_ms_small_square.domain.api.IDishServicePort;
 import com.example.food_court_ms_small_square.domain.model.Category;
 import com.example.food_court_ms_small_square.domain.model.Dish;
+import com.example.food_court_ms_small_square.domain.model.Page;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -99,33 +101,38 @@ public class DishHanlerTest {
     }
 
     @Test
-    public void test_list_dishes_with_valid_filters() {
-        String restauranteNit = "123456789";
+    public void test_list_dishes_with_valid_filters_returns_paginated_response() {
+        // Arrange
+        IDishServicePort dishServicePort = mock(IDishServicePort.class);
+        IDishRequestMapper dishRequestMapper = mock(IDishRequestMapper.class);
+        DishHandler dishHandler = new DishHandler(dishServicePort, dishRequestMapper);
+
+        String restauranteNit = "123";
         Boolean activo = true;
         Long categoriaId = 1L;
         int page = 0;
         int size = 10;
 
-        Dish dish = new Dish(1L, "Pizza", null, "Delicious pizza", 12.5f, "123456", "http://image.url", true);
-        DishResponseDto dishResponseDto = new DishResponseDto();
-        Page<Dish> dishPage = new PageImpl<>(List.of(dish));
+        List<Dish> dishes = Arrays.asList(new Dish(1L, null, null, null, null, null, null, null), new Dish(1L, null, null, null, null, null, null, null));
+        Page<Dish> dishPage = new Page<>(dishes, 1, 2L);
+        List<DishResponseDto> dishDtos = Arrays.asList(new DishResponseDto(), new DishResponseDto());
 
-        when(dishServicePort.listDishesByFilters(restauranteNit, activo, categoriaId, page, size))
-                .thenReturn(dishPage);
-        when(dishRequestMapper.toResponseDto(dish)).thenReturn(dishResponseDto);
+        when(dishServicePort.listDishesByFilters(eq(restauranteNit), eq(activo), eq(categoriaId),
+                any(PageRequestDto.class))).thenReturn(dishPage);
+        when(dishRequestMapper.toResponseDto(any(Dish.class))).thenReturn(new DishResponseDto());
 
         // Act
-        Page<DishResponseDto> result = dishHandler.listDishesByFilters(restauranteNit, activo, categoriaId, page, size);
+        PageResponseDto<DishResponseDto> result = dishHandler.listDishesByFilters(restauranteNit, activo, categoriaId, page, size);
 
         // Assert
         assertNotNull(result);
-        assertEquals(1, result.getTotalElements());
-        verify(dishServicePort).listDishesByFilters(restauranteNit, activo, categoriaId, page, size);
-        verify(dishRequestMapper).toResponseDto(dish);
+        assertEquals(2, result.getContent().size());
+        assertEquals(1, result.getTotalPages());
+        assertEquals(2L, result.getTotalElements());
     }
 
     @Test
-    public void test_list_dishes_with_null_filters() {
+    public void test_list_dishes_with_null_filters_returns_paginated_response() {
         // Arrange
         IDishServicePort dishServicePort = mock(IDishServicePort.class);
         IDishRequestMapper dishRequestMapper = mock(IDishRequestMapper.class);
@@ -137,21 +144,20 @@ public class DishHanlerTest {
         int page = 0;
         int size = 10;
 
-        Dish dish = new Dish(1L, "Pizza", null, "Delicious pizza", 12.5f, "123456", "http://image.url", true);
-        DishResponseDto dishResponseDto = new DishResponseDto();
-        Page<Dish> dishPage = new PageImpl<>(List.of(dish));
+        List<Dish> dishes = Arrays.asList(new Dish(1L, null, null, null, null, null, null, null));
+        Page<Dish> dishPage = new Page<>(dishes, 1, 1L);
 
-        when(dishServicePort.listDishesByFilters(null, null, null, page, size))
-                .thenReturn(dishPage);
-        when(dishRequestMapper.toResponseDto(dish)).thenReturn(dishResponseDto);
+        when(dishServicePort.listDishesByFilters(eq(restauranteNit), eq(activo), eq(categoriaId),
+                any(PageRequestDto.class))).thenReturn(dishPage);
+        when(dishRequestMapper.toResponseDto(any(Dish.class))).thenReturn(new DishResponseDto());
 
         // Act
-        Page<DishResponseDto> result = dishHandler.listDishesByFilters(restauranteNit, activo, categoriaId, page, size);
+        PageResponseDto<DishResponseDto> result = dishHandler.listDishesByFilters(restauranteNit, activo, categoriaId, page, size);
 
         // Assert
         assertNotNull(result);
-        assertEquals(1, result.getTotalElements());
-        verify(dishServicePort).listDishesByFilters(null, null, null, page, size);
-        verify(dishRequestMapper).toResponseDto(dish);
+        assertEquals(1, result.getContent().size());
+        assertEquals(1, result.getTotalPages());
+        assertEquals(1L, result.getTotalElements());
     }
 }

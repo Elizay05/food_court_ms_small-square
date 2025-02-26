@@ -4,11 +4,11 @@ import com.example.food_court_ms_small_square.application.dto.request.DishReques
 import com.example.food_court_ms_small_square.application.dto.request.UpdateDishRequestDto;
 import com.example.food_court_ms_small_square.application.dto.request.UpdateDishStatusRequestDto;
 import com.example.food_court_ms_small_square.application.dto.response.DishResponseDto;
-import org.springframework.data.domain.Page;
+import com.example.food_court_ms_small_square.application.dto.response.PageResponseDto;
 
 public interface IDishHandler {
     void saveDish(DishRequestDto dishRequestDto);
     void updateDish(UpdateDishRequestDto updateDishRequestDto);
     void updateDishStatus (Long id, UpdateDishStatusRequestDto updateDishStatusRequestDto);
-    Page<DishResponseDto> listDishesByFilters(String restauranteNit, Boolean activo, Long categoriaId, int page, int size);
+    PageResponseDto<DishResponseDto> listDishesByFilters(String restauranteNit, Boolean activo, Long categoriaId, int page, int size);
 }

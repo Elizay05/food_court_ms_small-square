@@ -1,10 +1,8 @@
 package com.example.food_court_ms_small_square.domain.usecase;
 
 
-import com.example.food_court_ms_small_square.application.dto.request.PageRequestDto;
 import com.example.food_court_ms_small_square.domain.exception.OwnerInvalidException;
 import com.example.food_court_ms_small_square.domain.exception.ElementAlreadyExistsException;
-import com.example.food_court_ms_small_square.domain.model.Page;
 import com.example.food_court_ms_small_square.domain.model.Restaurant;
 import com.example.food_court_ms_small_square.domain.spi.IRestaurantPersistencePort;
 import com.example.food_court_ms_small_square.domain.spi.IUserValidationPersistencePort;
@@ -13,6 +11,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -104,41 +106,5 @@ public class RestaurantUseCaseTest {
 
         assertNull(actualNit);
         verify(restaurantPersistencePort).validateNit();
-    }
-
-    @Test
-    public void test_list_restaurants_returns_valid_page() {
-        PageRequestDto pageRequest = new PageRequestDto(0, 10, "name", true);
-        List<Restaurant> restaurants = Arrays.asList(new Restaurant("123456789", "987654321", "Mi Restaurante", "Calle 123", "+573001234567", "http://logo.com/logo.png"),
-                new Restaurant("987654321", "123456789", "Mi Restaurante 2", "Calle 123", "+573001234567", "http://logo.com/logo.png"));
-        Page<Restaurant> expectedPage = new Page<>(restaurants, 1, 2);
-
-        when(restaurantPersistencePort.listRestaurants(pageRequest)).thenReturn(expectedPage);
-
-        // Act
-        Page<Restaurant> result = restaurantUseCase.listRestaurants(pageRequest);
-
-        // Assert
-        assertEquals(expectedPage.getContent(), result.getContent());
-        assertEquals(expectedPage.getTotalPages(), result.getTotalPages());
-        assertEquals(expectedPage.getTotalElements(), result.getTotalElements());
-        verify(restaurantPersistencePort).listRestaurants(pageRequest);
-    }
-
-    @Test
-    public void test_list_restaurants_with_large_page_number() {
-        PageRequestDto pageRequest = new PageRequestDto(999, 10, "name", true);
-        Page<Restaurant> emptyPage = new Page<>(Collections.emptyList(), 1, 0);
-
-        when(restaurantPersistencePort.listRestaurants(pageRequest)).thenReturn(emptyPage);
-
-        // Act
-        Page<Restaurant> result = restaurantUseCase.listRestaurants(pageRequest);
-
-        // Assert
-        assertTrue(result.getContent().isEmpty());
-        assertEquals(1, result.getTotalPages());
-        assertEquals(0, result.getTotalElements());
-        verify(restaurantPersistencePort).listRestaurants(pageRequest);
     }
 }

@@ -1,14 +1,12 @@
 package com.example.food_court_ms_small_square.domain.usecase;
 
+import com.example.food_court_ms_small_square.application.dto.request.PageRequestDto;
 import com.example.food_court_ms_small_square.domain.api.IDishServicePort;
 import com.example.food_court_ms_small_square.domain.exception.InvalidArgumentsException;
 import com.example.food_court_ms_small_square.domain.model.Dish;
+import com.example.food_court_ms_small_square.domain.model.Page;
 import com.example.food_court_ms_small_square.domain.spi.IDishPersistencePort;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 
 @RequiredArgsConstructor
 public class DishUseCase implements IDishServicePort {
@@ -35,8 +33,12 @@ public class DishUseCase implements IDishServicePort {
     }
 
     @Override
-    public Page<Dish> listDishesByFilters(String restauranteNit, Boolean activo, Long categoriaId, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("nombre").ascending());
-        return dishPersistencePort.listDishesByFilters(restauranteNit, activo, categoriaId, pageable);
+    public Page<Dish> listDishesByFilters(String restauranteNit, Boolean activo, Long categoriaId, PageRequestDto pageRequestDto) {
+        Page<Dish> dishPage = dishPersistencePort.listDishesByFilters(restauranteNit, activo, categoriaId, pageRequestDto);
+        return new Page<>(
+                dishPage.getContent(),
+                dishPage.getTotalPages(),
+                dishPage.getTotalElements()
+        );
     }
 }

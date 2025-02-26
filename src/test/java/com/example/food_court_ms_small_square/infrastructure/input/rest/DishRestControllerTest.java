@@ -4,19 +4,19 @@ import com.example.food_court_ms_small_square.application.dto.request.DishReques
 import com.example.food_court_ms_small_square.application.dto.request.UpdateDishRequestDto;
 import com.example.food_court_ms_small_square.application.dto.request.UpdateDishStatusRequestDto;
 import com.example.food_court_ms_small_square.application.dto.response.DishResponseDto;
+import com.example.food_court_ms_small_square.application.dto.response.PageResponseDto;
 import com.example.food_court_ms_small_square.application.handler.IDishHandler;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.Arrays;
+import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
@@ -78,27 +78,47 @@ public class DishRestControllerTest {
     }
 
     @Test
-    public void test_list_dishes_with_valid_restaurant_nit() {
+    public void test_list_dishes_with_valid_nit_returns_paginated_response() {
+        // Arrange
         String validNit = "123456789";
         int page = 0;
         int size = 10;
         Long categoryId = null;
 
-        Page<DishResponseDto> expectedPage = new PageImpl<>(Arrays.asList(
-                new DishResponseDto("Dish1", "Description1", 10.0f, "url1"),
-                new DishResponseDto("Dish2", "Description2", 20.0f, "url2")
-        ));
+        List<DishResponseDto> dishList = Arrays.asList(new DishResponseDto(), new DishResponseDto());
+        PageResponseDto<DishResponseDto> expectedResponse = new PageResponseDto<>(dishList, 1, 2);
 
         when(dishHandler.listDishesByFilters(validNit, true, categoryId, page, size))
-                .thenReturn(expectedPage);
+                .thenReturn(expectedResponse);
 
         // Act
-        ResponseEntity<Page<DishResponseDto>> response = dishRestController.listDishes(
+        ResponseEntity<PageResponseDto<DishResponseDto>> response = dishRestController.listDishes(
                 validNit, categoryId, page, size);
 
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(expectedPage, response.getBody());
+        assertNotNull(response.getBody());
+        assertEquals(expectedResponse, response.getBody());
+
         verify(dishHandler).listDishesByFilters(validNit, true, categoryId, page, size);
+    }
+
+    @Test
+    public void test_list_dishes_with_invalid_nit_throws_exception() {
+        // Arrange
+        String invalidNit = "";
+        int page = 0;
+        int size = 10;
+        Long categoryId = null;
+
+        when(dishHandler.listDishesByFilters(invalidNit, true, categoryId, page, size))
+                .thenThrow(new IllegalArgumentException("Invalid restauranteNit"));
+
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> {
+            dishRestController.listDishes(invalidNit, categoryId, page, size);
+        });
+
+        verify(dishHandler).listDishesByFilters(invalidNit, true, categoryId, page, size);
     }
 }

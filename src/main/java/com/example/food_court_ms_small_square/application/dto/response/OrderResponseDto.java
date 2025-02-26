@@ -12,7 +12,10 @@ import java.util.List;
 @NoArgsConstructor
 public class OrderResponseDto {
     private Long id;
-    private String estado;
+    private String idCliente;
+    private String nitRestaurante;
     private LocalDateTime fecha;
+    private String estado;
+    private String idChef;
     private List<OrderDishResponseDto> platos;
 }
