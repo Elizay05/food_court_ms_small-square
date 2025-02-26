@@ -89,4 +89,24 @@ public class OrderRestControllerTest {
         assertEquals(expectedPage.getContent(), response.getBody().getContent());
         verify(orderHandler).listOrdersByFilters(emptyStatus, 0, 10);
     }
+
+    @Test
+    public void test_assign_order_success() {
+        // Arrange
+        Long orderId = 1L;
+        OrderResponseDto expectedResponse = new OrderResponseDto();
+        expectedResponse.setId(orderId);
+        expectedResponse.setEstado("LISTO");
+
+        when(orderHandler.assignOrder(orderId)).thenReturn(expectedResponse);
+
+        // Act
+        ResponseEntity<OrderResponseDto> response = orderRestController.assignOrder(orderId);
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(orderId, response.getBody().getId());
+        verify(orderHandler).assignOrder(orderId);
+    }
 }

@@ -20,10 +20,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -370,5 +367,69 @@ public class OrderJpaAdapterTest {
         assertEquals(0, result.getTotalElements());
         assertEquals(0, result.getTotalPages());
         assertTrue(result.getContent().isEmpty());
+    }
+
+    @Test
+    public void test_get_order_by_id_returns_mapped_order_when_exists() {
+        // Arrange
+        Long orderId = 1L;
+        OrderEntity orderEntity = new OrderEntity();
+        Order expectedOrder = new Order(1L, "client1", "nit1", LocalDateTime.now(), "PENDING", "chef1", new ArrayList<>());
+
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(orderEntity));
+        when(orderEntityMapper.toDomain(orderEntity)).thenReturn(expectedOrder);
+
+        // Act
+        Optional<Order> result = orderJpaAdapter.getOrderById(orderId);
+
+        // Assert
+        assertTrue(result.isPresent());
+        assertEquals(expectedOrder, result.get());
+        verify(orderRepository).findById(orderId);
+        verify(orderEntityMapper).toDomain(orderEntity);
+    }
+
+    @Test
+    public void test_get_order_by_id_with_null_id() {
+        // Arrange
+        Long orderId = null;
+        when(orderRepository.findById(null)).thenReturn(Optional.empty());
+
+        // Act
+        Optional<Order> result = orderJpaAdapter.getOrderById(orderId);
+
+        // Assert
+        assertTrue(result.isEmpty());
+        verify(orderRepository).findById(null);
+        verifyNoInteractions(orderEntityMapper);
+    }
+
+    @Test
+    public void test_update_order_success() {
+        // Arrange
+        Order order = new Order(1L, "client1", "nit123", LocalDateTime.now(), "PENDING", "chef1", new ArrayList<>());
+        OrderEntity orderEntity = new OrderEntity(1L, "client1", "nit123", LocalDateTime.now(), "PENDING", "chef1");
+        OrderEntity savedOrderEntity = new OrderEntity(1L, "client1", "nit123", LocalDateTime.now(), "PENDING", "chef1");
+        List<OrderDishEntity> orderDishEntities = new ArrayList<>();
+        Order mappedOrder = new Order(1L, "client1", "nit123", LocalDateTime.now(), "PENDING", "chef1", new ArrayList<>());
+
+        when(orderEntityMapper.toEntity(order)).thenReturn(orderEntity);
+        when(orderRepository.save(orderEntity)).thenReturn(savedOrderEntity);
+        when(orderDishRepository.findByOrden(savedOrderEntity)).thenReturn(orderDishEntities);
+        when(orderEntityMapper.toDomain(savedOrderEntity)).thenReturn(mappedOrder);
+        when(orderDishEntityMapper.toDomainList(orderDishEntities)).thenReturn(new ArrayList<>());
+
+        // Act
+        Order result = orderJpaAdapter.updateOrder(order);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(order.getId(), result.getId());
+        assertEquals(order.getIdCliente(), result.getIdCliente());
+        assertEquals(order.getNitRestaurante(), result.getNitRestaurante());
+        assertEquals(order.getEstado(), result.getEstado());
+        verify(orderEntityMapper).toEntity(order);
+        verify(orderRepository).save(orderEntity);
+        verify(orderDishRepository).findByOrden(savedOrderEntity);
     }
 }

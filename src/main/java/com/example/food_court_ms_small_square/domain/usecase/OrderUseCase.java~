@@ -58,7 +58,7 @@ public class OrderUseCase implements IOrderServicePort {
     }
 
     @Override
-    public Order assignOrder(Long orderId, String employeeDocument, String nitRestaurant) {
+    public void assignOrder(Long orderId, String employeeDocument, String nitRestaurant) {
         Order order = orderPersistencePort.getOrderById(orderId)
                 .orElseThrow(() -> new OrderNotFoundException("Orden no encontrada."));
 
@@ -73,6 +73,6 @@ public class OrderUseCase implements IOrderServicePort {
         order.setIdChef(employeeDocument);
         order.setEstado(DomainConstants.ORDER_STATUS_IN_PROGRESS);
 
-        return orderPersistencePort.updateOrder(order);
+        orderPersistencePort.updateOrder(order);
     }
 }

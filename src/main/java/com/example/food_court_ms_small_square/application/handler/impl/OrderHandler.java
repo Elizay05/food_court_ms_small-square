@@ -51,4 +51,12 @@ public class OrderHandler implements IOrderHandler {
 
         return new PageResponseDto<>(orderDtos, orderPage.getTotalPages(), orderPage.getTotalElements());
     }
+
+    @Override
+    public OrderResponseDto assignOrder(Long orderId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Order order = orderServicePort.assignOrder(orderId, userDetails.getDocumentNumber(), userDetails.getNit());
+        return orderRequestMapper.toResponseDto(order);
+    }
 }
