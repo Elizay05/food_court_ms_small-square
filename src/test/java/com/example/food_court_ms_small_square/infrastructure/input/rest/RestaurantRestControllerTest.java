@@ -1,18 +1,19 @@
 package com.example.food_court_ms_small_square.infrastructure.input.rest;
 
 import com.example.food_court_ms_small_square.application.dto.request.RestaurantRequestDto;
+import com.example.food_court_ms_small_square.application.dto.response.PageResponseDto;
 import com.example.food_court_ms_small_square.application.dto.response.RestaurantResponseDto;
 import com.example.food_court_ms_small_square.application.handler.impl.RestaurantHandler;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -54,15 +55,25 @@ public class RestaurantRestControllerTest {
     }
 
     @Test
-    public void test_list_restaurants_with_default_pagination() {
-        Page<RestaurantResponseDto> expectedPage = new PageImpl<>(Arrays.asList(
-                new RestaurantResponseDto("Restaurant 1", "logo1.jpg"),
-                new RestaurantResponseDto("Restaurant 2", "logo2.jpg")
-        ));
+    public void test_list_restaurants_default_pagination() {
+        List<RestaurantResponseDto> restaurants = Arrays.asList(
+                new RestaurantResponseDto(),
+                new RestaurantResponseDto()
+        );
+
+        PageResponseDto<RestaurantResponseDto> expectedPage = new PageResponseDto<>(
+                restaurants,
+                1,
+                2L
+        );
+
         when(restaurantHandler.listRestaurants(0, 10)).thenReturn(expectedPage);
 
-        ResponseEntity<Page<RestaurantResponseDto>> response = controller.listRestaurants(0, 10);
+        // Act
+        ResponseEntity<PageResponseDto<RestaurantResponseDto>> response =
+                controller.listRestaurants(0, 10);
 
+        // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(expectedPage, response.getBody());
         verify(restaurantHandler).listRestaurants(0, 10);

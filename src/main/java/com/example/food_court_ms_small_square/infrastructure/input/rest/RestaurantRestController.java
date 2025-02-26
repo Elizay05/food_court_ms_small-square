@@ -1,15 +1,15 @@
 package com.example.food_court_ms_small_square.infrastructure.input.rest;
 
 import com.example.food_court_ms_small_square.application.dto.request.RestaurantRequestDto;
+import com.example.food_court_ms_small_square.application.dto.response.PageResponseDto;
 import com.example.food_court_ms_small_square.application.dto.response.RestaurantResponseDto;
-import com.example.food_court_ms_small_square.application.handler.impl.RestaurantHandler;
+import com.example.food_court_ms_small_square.application.handler.IRestaurantHandler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class RestaurantRestController {
 
-    private final RestaurantHandler restaurantHandler;
+    private final IRestaurantHandler restaurantHandler;
 
     @Operation(
             summary = "Register a new restaurant",
@@ -81,11 +81,18 @@ public class RestaurantRestController {
             content = @Content(mediaType = "application/json"))
     @GetMapping("/list")
     @PreAuthorize("hasRole('ROLE_Customer')")
-    public ResponseEntity<Page<RestaurantResponseDto>> listRestaurants(
+    public ResponseEntity<PageResponseDto<RestaurantResponseDto>> listRestaurants(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        Page<RestaurantResponseDto> restaurants = restaurantHandler.listRestaurants(page, size);
-        return ResponseEntity.ok(restaurants);
+        PageResponseDto<RestaurantResponseDto> restaurantPage = restaurantHandler.listRestaurants(page, size);
+
+        PageResponseDto<RestaurantResponseDto> response = new PageResponseDto<>(
+                restaurantPage.getContent(),
+                restaurantPage.getTotalPages(),
+                restaurantPage.getTotalElements()
+        );
+
+        return ResponseEntity.ok(response);
     }
 }

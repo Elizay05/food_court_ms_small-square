@@ -1,16 +1,14 @@
 package com.example.food_court_ms_small_square.domain.usecase;
 
+import com.example.food_court_ms_small_square.application.dto.request.PageRequestDto;
 import com.example.food_court_ms_small_square.domain.api.IRestaurantServicePort;
 import com.example.food_court_ms_small_square.domain.exception.OwnerInvalidException;
 import com.example.food_court_ms_small_square.domain.exception.ElementAlreadyExistsException;
+import com.example.food_court_ms_small_square.domain.model.Page;
 import com.example.food_court_ms_small_square.domain.model.Restaurant;
 import com.example.food_court_ms_small_square.domain.spi.IRestaurantPersistencePort;
 import com.example.food_court_ms_small_square.domain.spi.IUserValidationPersistencePort;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 
 @RequiredArgsConstructor
 public class RestaurantUseCase implements IRestaurantServicePort {
@@ -37,8 +35,12 @@ public class RestaurantUseCase implements IRestaurantServicePort {
     }
 
     @Override
-    public Page<Restaurant> listRestaurants(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("nombre").ascending());
-        return restaurantPersistencePort.listRestaurants(pageable);
+    public Page<Restaurant> listRestaurants(PageRequestDto pageRequest) {
+        Page<Restaurant> restaurantPage = restaurantPersistencePort.listRestaurants(pageRequest);
+        return new Page<>(
+                restaurantPage.getContent(),
+                restaurantPage.getTotalPages(),
+                restaurantPage.getTotalElements()
+        );
     }
 }

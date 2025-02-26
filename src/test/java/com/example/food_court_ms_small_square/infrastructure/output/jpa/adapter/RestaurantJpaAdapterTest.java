@@ -1,5 +1,6 @@
 package com.example.food_court_ms_small_square.infrastructure.output.jpa.adapter;
 
+import com.example.food_court_ms_small_square.application.dto.request.PageRequestDto;
 import com.example.food_court_ms_small_square.domain.model.Restaurant;
 import com.example.food_court_ms_small_square.infrastructure.configuration.security.CustomUserDetails;
 import com.example.food_court_ms_small_square.infrastructure.output.jpa.entity.RestaurantEntity;
@@ -9,10 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -108,7 +106,7 @@ public class RestaurantJpaAdapterTest {
         restaurant.setCedulaPropietario(documentNumber);
 
         Authentication authentication = mock(Authentication.class);
-        CustomUserDetails userDetails = new CustomUserDetails("username", documentNumber, Collections.emptyList());
+        CustomUserDetails userDetails = new CustomUserDetails("username", documentNumber, "", Collections.emptyList());
 
         when(authentication.getPrincipal()).thenReturn(userDetails);
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -124,27 +122,76 @@ public class RestaurantJpaAdapterTest {
     }
 
     @Test
-    public void test_list_restaurants_returns_paginated_results() {
-        RestaurantEntity entity1 = new RestaurantEntity();
-        RestaurantEntity entity2 = new RestaurantEntity();
-        List<RestaurantEntity> entities = Arrays.asList(entity1, entity2);
+    public void test_list_restaurants_ascending_sort() {
+        // Arrange
+        PageRequestDto pageRequest = new PageRequestDto(0, 10, "nombre", true);
 
-        Restaurant restaurant1 = new Restaurant("123", "456", "Rest1", "Address1", "123456", "logo1.jpg");
-        Restaurant restaurant2 = new Restaurant("789", "012", "Rest2", "Address2", "789012", "logo2.jpg");
+        List<RestaurantEntity> restaurantEntities = Arrays.asList(
+                new RestaurantEntity("123", "456", "Restaurant A", "Address 1", "123456", "url1"),
+                new RestaurantEntity("789", "012", "Restaurant B", "Address 2", "789012", "url2")
+        );
 
-        Pageable pageable = PageRequest.of(0, 10);
-        Page<RestaurantEntity> entityPage = new PageImpl<>(entities, pageable, entities.size());
+        Page<RestaurantEntity> springPage = new PageImpl<>(restaurantEntities, PageRequest.of(0, 10, Sort.by("nombre").ascending()), 2);
 
-        when(restaurantRepository.findAll(pageable)).thenReturn(entityPage);
-        when(restaurantEntityMapper.toModel(entity1)).thenReturn(restaurant1);
-        when(restaurantEntityMapper.toModel(entity2)).thenReturn(restaurant2);
+        when(restaurantRepository.findAll(any(Pageable.class))).thenReturn(springPage);
+        when(restaurantEntityMapper.toModel(any(RestaurantEntity.class)))
+                .thenReturn(new Restaurant("123", "456", "Restaurant A", "Address 1", "123456", "url1"))
+                .thenReturn(new Restaurant("789", "012", "Restaurant B", "Address 2", "789012", "url2"));
 
         // Act
-        Page<Restaurant> result = restaurantJpaAdapter.listRestaurants(pageable);
+        com.example.food_court_ms_small_square.domain.model.Page<Restaurant> result = restaurantJpaAdapter.listRestaurants(pageRequest);
 
         // Assert
         assertEquals(2, result.getContent().size());
-        verify(restaurantRepository).findAll(pageable);
-        verify(restaurantEntityMapper, times(2)).toModel(any(RestaurantEntity.class));
+        assertEquals("Restaurant A", result.getContent().get(0).getNombre());
+        assertEquals("Restaurant B", result.getContent().get(1).getNombre());
+        verify(restaurantRepository).findAll(any(Pageable.class));
+    }
+
+    @Test
+    public void test_list_restaurants_descending_sort() {
+        // Arrange
+        PageRequestDto pageRequest = new PageRequestDto(0, 10, "nombre", false);
+
+        List<RestaurantEntity> restaurantEntities = Arrays.asList(
+                new RestaurantEntity("789", "012", "Restaurant B", "Address 2", "789012", "url2"),
+                new RestaurantEntity("123", "456", "Restaurant A", "Address 1", "123456", "url1")
+        );
+
+        Page<RestaurantEntity> springPage = new PageImpl<>(restaurantEntities, PageRequest.of(0, 10, Sort.by("nombre").descending()), 2);
+
+        when(restaurantRepository.findAll(any(Pageable.class))).thenReturn(springPage);
+        when(restaurantEntityMapper.toModel(any(RestaurantEntity.class)))
+                .thenReturn(new Restaurant("789", "012", "Restaurant B", "Address 2", "789012", "url2"))
+                .thenReturn(new Restaurant("123", "456", "Restaurant A", "Address 1", "123456", "url1"));
+
+        // Act
+        com.example.food_court_ms_small_square.domain.model.Page<Restaurant> result = restaurantJpaAdapter.listRestaurants(pageRequest);
+
+        // Assert
+        assertEquals(2, result.getContent().size());
+        assertEquals("Restaurant B", result.getContent().get(0).getNombre());
+        assertEquals("Restaurant A", result.getContent().get(1).getNombre());
+        verify(restaurantRepository).findAll(any(Pageable.class));
+    }
+
+    @Test
+    public void test_list_restaurants_empty_list() {
+        // Arrange
+        PageRequestDto pageRequest = new PageRequestDto(0, 10, "nombre", true);
+
+        List<RestaurantEntity> emptyList = Collections.emptyList();
+        Page<RestaurantEntity> emptyPage = new PageImpl<>(emptyList, PageRequest.of(0, 10, Sort.by("nombre").ascending()), 0);
+
+        when(restaurantRepository.findAll(any(Pageable.class))).thenReturn(emptyPage);
+
+        // Act
+        com.example.food_court_ms_small_square.domain.model.Page<Restaurant> result = restaurantJpaAdapter.listRestaurants(pageRequest);
+
+        // Assert
+        assertTrue(result.getContent().isEmpty());
+        assertEquals(0, result.getTotalElements());
+        assertEquals(0, result.getTotalPages());
+        verify(restaurantRepository).findAll(any(Pageable.class));
     }
 }

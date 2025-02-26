@@ -2,26 +2,25 @@ package com.example.food_court_ms_small_square.infrastructure.input.rest;
 
 import com.example.food_court_ms_small_square.application.dto.request.OrderRequestDto;
 import com.example.food_court_ms_small_square.application.dto.response.OrderResponseDto;
-import com.example.food_court_ms_small_square.application.handler.impl.OrderHandler;
+import com.example.food_court_ms_small_square.application.dto.response.PageResponseDto;
+import com.example.food_court_ms_small_square.application.handler.IOrderHandler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/order")
 @RequiredArgsConstructor
 public class OrderRestController {
 
-    private final OrderHandler orderHandler;
+    private final IOrderHandler orderHandler;
 
     @Operation(
             summary = "Create a new order",
@@ -49,5 +48,28 @@ public class OrderRestController {
     public ResponseEntity<OrderResponseDto> saveOrder(@RequestBody OrderRequestDto orderRequestDto) {
         OrderResponseDto orderResponseDto = orderHandler.saveOrder(orderRequestDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(orderResponseDto);
+    }
+
+
+    @Operation(
+            summary = "List orders with optional filters",
+            description = "Retrieves a paginated list of orders. The list can be filtered by status."
+    )
+    @ApiResponse(responseCode = "200", description = "Orders retrieved successfully",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = Page.class)))
+    @ApiResponse(responseCode = "403", description = "Forbidden - User lacks necessary permissions",
+            content = @Content(mediaType = "application/json"))
+    @ApiResponse(responseCode = "500", description = "Internal server error",
+            content = @Content(mediaType = "application/json"))
+    @GetMapping("/list")
+    @PreAuthorize("hasRole('ROLE_Employee')")
+    public ResponseEntity<PageResponseDto<OrderResponseDto>> listOrders(
+            @RequestParam(required = false) String estado,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        PageResponseDto<OrderResponseDto> orders = orderHandler.listOrdersByFilters(estado, page, size);
+        return ResponseEntity.ok(orders);
     }
 }

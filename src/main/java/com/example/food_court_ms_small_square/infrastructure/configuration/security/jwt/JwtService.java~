@@ -1,6 +1,5 @@
 package com.example.food_court_ms_small_square.infrastructure.configuration.security.jwt;
 
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -45,13 +44,12 @@ public class JwtService {
     }
 
     public String extractNit(String token) {
-        Claims claims = Jwts.parserBuilder()
+        return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()
                 .parseClaimsJws(token)
-                .getBody();
-
-        return claims.containsKey("nit") ? claims.get("nit", String.class) : null;
+                .getBody()
+                .get("nit", String.class);
     }
 
     public boolean validateToken(String token, UserDetails userDetails) {

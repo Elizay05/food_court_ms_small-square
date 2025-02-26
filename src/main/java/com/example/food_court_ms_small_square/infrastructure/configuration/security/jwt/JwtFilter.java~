@@ -39,6 +39,7 @@ public class JwtFilter extends OncePerRequestFilter {
             String role = jwtService.extractUserRole(token);
             String documentNumber = jwtService.extractDocumentNumber(token);
 
+            // Extrae el nit si está presente, de lo contrario, usa null
             String nit = jwtService.extractNit(token);
 
             UserDetails userDetails = new CustomUserDetails(username, documentNumber, nit,
