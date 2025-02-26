@@ -5,30 +5,20 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Data
-@Table(name = "dish")
+@Table(name = "orders")
 @AllArgsConstructor
 @NoArgsConstructor
-public class DishEntity {
-
+public class OrderEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    private String nombre;
-
-    private String descripcion;
-
-    private Float precio;
-
-    private String restauranteNit;
-
-    private String imagenUrl;
-
-    private Boolean activo;
-
-    @ManyToOne
-    @JoinColumn(name = "categoria_id")
-    private CategoryEntity categoria;
+    private String idCliente;
+    private String nitRestaurante;
+    private LocalDateTime fecha;
+    private String estado;
+    private String idChef;
 }

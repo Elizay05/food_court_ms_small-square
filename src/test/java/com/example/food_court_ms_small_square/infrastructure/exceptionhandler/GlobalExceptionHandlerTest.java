@@ -1,9 +1,11 @@
 package com.example.food_court_ms_small_square.infrastructure.exceptionhandler;
 
 import com.example.food_court_ms_small_square.domain.exception.InvalidArgumentsException;
+import com.example.food_court_ms_small_square.domain.exception.OrderInProgressException;
 import com.example.food_court_ms_small_square.domain.exception.OwnerInvalidException;
 import com.example.food_court_ms_small_square.domain.exception.ElementAlreadyExistsException;
 import com.example.food_court_ms_small_square.infrastructure.exception.NoSuchElementException;
+import com.example.food_court_ms_small_square.infrastructure.exception.UnauthorizedException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -86,6 +88,28 @@ public class GlobalExceptionHandlerTest {
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals("Debe proporcionar al menos un campo para actualizar.", response.getBody().getMessage());
+        assertEquals(HttpStatus.BAD_REQUEST.toString(), response.getBody().getStatus());
+    }
+
+    @Test
+    void shouldHandleUnauthorizedException() {
+        UnauthorizedException exception = new UnauthorizedException("No tienes permisos para actualizar un plato en este restaurante");
+
+        ResponseEntity<ExceptionResponse> response = globalExceptionHandler.handleUnauthorizedException(exception);
+
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        assertEquals("No tienes permisos para actualizar un plato en este restaurante", response.getBody().getMessage());
+        assertEquals(HttpStatus.UNAUTHORIZED.toString(), response.getBody().getStatus());
+    }
+
+    @Test
+    void shouldHandleOrderInProgressException() {
+        OrderInProgressException exception = new OrderInProgressException("El cliente ya tiene un pedido en proceso.");
+
+        ResponseEntity<ExceptionResponse> response = globalExceptionHandler.handleOrderInProgressException(exception);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("El cliente ya tiene un pedido en proceso.", response.getBody().getMessage());
         assertEquals(HttpStatus.BAD_REQUEST.toString(), response.getBody().getStatus());
     }
 }

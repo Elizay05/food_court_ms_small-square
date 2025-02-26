@@ -1,6 +1,7 @@
 package com.example.food_court_ms_small_square.infrastructure.exceptionhandler;
 
 import com.example.food_court_ms_small_square.domain.exception.InvalidArgumentsException;
+import com.example.food_court_ms_small_square.domain.exception.OrderInProgressException;
 import com.example.food_court_ms_small_square.domain.exception.OwnerInvalidException;
 import com.example.food_court_ms_small_square.domain.exception.ElementAlreadyExistsException;
 import com.example.food_court_ms_small_square.infrastructure.exception.NoSuchElementException;
@@ -55,5 +56,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ExceptionResponse> handleUnauthorizedException(UnauthorizedException ex) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(ex.getMessage(), HttpStatus.UNAUTHORIZED.toString(), LocalDateTime.now());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(exceptionResponse);
+    }
+
+    @ExceptionHandler(OrderInProgressException.class)
+    public ResponseEntity<ExceptionResponse> handleOrderInProgressException(OrderInProgressException ex) {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(ex.getMessage(), HttpStatus.BAD_REQUEST.toString(), LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
     }
 }

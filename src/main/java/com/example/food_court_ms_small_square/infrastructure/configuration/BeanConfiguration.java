@@ -1,17 +1,25 @@
 package com.example.food_court_ms_small_square.infrastructure.configuration;
 
 import com.example.food_court_ms_small_square.domain.api.IDishServicePort;
+import com.example.food_court_ms_small_square.domain.api.IOrderServicePort;
 import com.example.food_court_ms_small_square.domain.api.IRestaurantServicePort;
 import com.example.food_court_ms_small_square.domain.spi.IDishPersistencePort;
+import com.example.food_court_ms_small_square.domain.spi.IOrderPersistencePort;
 import com.example.food_court_ms_small_square.domain.spi.IRestaurantPersistencePort;
 import com.example.food_court_ms_small_square.domain.spi.IUserValidationPersistencePort;
 import com.example.food_court_ms_small_square.domain.usecase.DishUseCase;
+import com.example.food_court_ms_small_square.domain.usecase.OrderUseCase;
 import com.example.food_court_ms_small_square.domain.usecase.RestaurantUseCase;
 import com.example.food_court_ms_small_square.infrastructure.output.jpa.adapter.DishJpaAdapter;
+import com.example.food_court_ms_small_square.infrastructure.output.jpa.adapter.OrderJpaAdapter;
 import com.example.food_court_ms_small_square.infrastructure.output.jpa.adapter.RestaurantJpaAdapter;
 import com.example.food_court_ms_small_square.infrastructure.output.jpa.mapper.IDishEntityMapper;
+import com.example.food_court_ms_small_square.infrastructure.output.jpa.mapper.IOrderDishEntityMapper;
+import com.example.food_court_ms_small_square.infrastructure.output.jpa.mapper.IOrderEntityMapper;
 import com.example.food_court_ms_small_square.infrastructure.output.jpa.mapper.IRestaurantEntityMapper;
 import com.example.food_court_ms_small_square.infrastructure.output.jpa.repository.IDishRespository;
+import com.example.food_court_ms_small_square.infrastructure.output.jpa.repository.IOrderDishRepository;
+import com.example.food_court_ms_small_square.infrastructure.output.jpa.repository.IOrderRepository;
 import com.example.food_court_ms_small_square.infrastructure.output.jpa.repository.IRestaurantRepository;
 import com.example.food_court_ms_small_square.infrastructure.output.rest.UserRestAdapter;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,6 +36,10 @@ public class BeanConfiguration {
     private final IRestaurantEntityMapper restaurantEntityMapper;
     private final IDishEntityMapper dishEntityMapper;
     private final IDishRespository dishRepository;
+    private final IOrderRepository orderRepository;
+    private final IOrderEntityMapper orderEntityMapper;
+    private final IOrderDishEntityMapper orderDishEntityMapper;
+    private final IOrderDishRepository orderDishRepository;
 
     @Bean
     public RestTemplate restTemplate() {
@@ -57,5 +69,15 @@ public class BeanConfiguration {
     @Bean
     public IDishServicePort dishServicePort() {
         return new DishUseCase(dishPersistencePort());
+    }
+
+    @Bean
+    public IOrderPersistencePort orderPersistencePort() {
+        return new OrderJpaAdapter(orderRepository, orderEntityMapper, orderDishEntityMapper, orderDishRepository, dishRepository);
+    }
+
+    @Bean
+    public IOrderServicePort orderServicePort() {
+        return new OrderUseCase(orderPersistencePort());
     }
 }
