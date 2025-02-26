@@ -1,9 +1,6 @@
 package com.example.food_court_ms_small_square.infrastructure.exceptionhandler;
 
-import com.example.food_court_ms_small_square.domain.exception.InvalidArgumentsException;
-import com.example.food_court_ms_small_square.domain.exception.OrderInProgressException;
-import com.example.food_court_ms_small_square.domain.exception.OwnerInvalidException;
-import com.example.food_court_ms_small_square.domain.exception.ElementAlreadyExistsException;
+import com.example.food_court_ms_small_square.domain.exception.*;
 import com.example.food_court_ms_small_square.infrastructure.exception.NoSuchElementException;
 import com.example.food_court_ms_small_square.infrastructure.exception.UnauthorizedException;
 import org.junit.jupiter.api.BeforeEach;
@@ -111,5 +108,38 @@ public class GlobalExceptionHandlerTest {
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals("El cliente ya tiene un pedido en proceso.", response.getBody().getMessage());
         assertEquals(HttpStatus.BAD_REQUEST.toString(), response.getBody().getStatus());
+    }
+
+    @Test
+    void shouldHandleOrderNotFoundException() {
+        OrderNotFoundException exception = new OrderNotFoundException("Orden no encontrada.");
+
+        ResponseEntity<ExceptionResponse> response = globalExceptionHandler.handleOrderNotFoundException(exception);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals("Orden no encontrada.", response.getBody().getMessage());
+        assertEquals(HttpStatus.NOT_FOUND.toString(), response.getBody().getStatus());
+    }
+
+    @Test
+    void shouldHandleOrderAlreadyAssignedException() {
+        OrderAlreadyAssignedException exception = new OrderAlreadyAssignedException("La orden ya esta asignada a un chef.");
+
+        ResponseEntity<ExceptionResponse> response = globalExceptionHandler.handleOrderAlreadyAssignedException(exception);
+
+        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+        assertEquals("La orden ya esta asignada a un chef.", response.getBody().getMessage());
+        assertEquals(HttpStatus.CONFLICT.toString(), response.getBody().getStatus());
+    }
+
+    @Test
+    void shouldHandleOrderAssignmentNotAllowedException() {
+        OrderAssignmentNotAllowedException exception = new OrderAssignmentNotAllowedException("No tienes permisos para asignar esta orden.");
+
+        ResponseEntity<ExceptionResponse> response = globalExceptionHandler.handleOrderAssignmentNotAllowedException(exception);
+
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+        assertEquals("No tienes permisos para asignar esta orden.", response.getBody().getMessage());
+        assertEquals(HttpStatus.FORBIDDEN.toString(), response.getBody().getStatus());
     }
 }

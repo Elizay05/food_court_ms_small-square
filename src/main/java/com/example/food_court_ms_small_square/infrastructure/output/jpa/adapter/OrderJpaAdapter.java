@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -53,7 +54,8 @@ public class OrderJpaAdapter implements IOrderPersistencePort {
     @Override
     public boolean hasActiveOrders(String clienteId) {
         return orderRepository.countByEstadoAndIdCliente(DomainConstants.ORDER_STATUS_PENDING, clienteId)
-                + orderRepository.countByEstadoAndIdCliente(DomainConstants.ORDER_STATUS_IN_PROGRESS, (clienteId)) > 0;
+                + orderRepository.countByEstadoAndIdCliente(DomainConstants.ORDER_STATUS_IN_PROGRESS, clienteId)
+                + orderRepository.countByEstadoAndIdCliente(DomainConstants.ORDER_STATUS_READY, clienteId) > 0;
     }
 
     @Override
@@ -78,5 +80,24 @@ public class OrderJpaAdapter implements IOrderPersistencePort {
                 .collect(Collectors.toList());
 
         return new Page<>(ordersWithDishes, orderEntities.getTotalPages(), orderEntities.getTotalElements());
+    }
+
+    @Override
+    public Optional<Order> getOrderById(Long orderId) {
+        return orderRepository.findById(orderId)
+                .map(orderEntityMapper::toDomain);
+    }
+
+    @Override
+    public Order updateOrder(Order order) {
+        OrderEntity orderEntity = orderEntityMapper.toEntity(order);
+        OrderEntity savedOrderEntity = orderRepository.save(orderEntity);
+
+        List<OrderDishEntity> orderDishEntities = orderDishRepository.findByOrden(savedOrderEntity);
+
+        Order mappedOrder = orderEntityMapper.toDomain(savedOrderEntity);
+        mappedOrder.setPlatos(orderDishEntityMapper.toDomainList(orderDishEntities));
+
+        return mappedOrder;
     }
 }

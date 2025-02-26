@@ -1,8 +1,7 @@
 package com.example.food_court_ms_small_square.domain.usecase;
 
 import com.example.food_court_ms_small_square.application.dto.request.PageRequestDto;
-import com.example.food_court_ms_small_square.domain.exception.InvalidArgumentsException;
-import com.example.food_court_ms_small_square.domain.exception.OrderInProgressException;
+import com.example.food_court_ms_small_square.domain.exception.*;
 import com.example.food_court_ms_small_square.domain.model.Order;
 import com.example.food_court_ms_small_square.domain.model.OrderDish;
 import com.example.food_court_ms_small_square.domain.model.Page;
@@ -18,10 +17,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -158,5 +154,61 @@ public class OrderUseCaseTest {
         assertEquals(expectedPage.getTotalPages(), result.getTotalPages());
         assertEquals(expectedPage.getTotalElements(), result.getTotalElements());
         verify(orderPersistencePort).listOrdersByFilters(nit, null, pageRequest);
+    }
+
+    @Test
+    public void test_assign_order_success() {
+        Order mockOrder = new Order(1L, "client1", "nit123", LocalDateTime.now(),
+                DomainConstants.ORDER_STATUS_PENDING, null, new ArrayList<>());
+
+        when(orderPersistencePort.getOrderById(1L)).thenReturn(Optional.of(mockOrder));
+        when(orderPersistencePort.updateOrder(any(Order.class))).thenReturn(mockOrder);
+
+        // Act
+        Order result = orderUseCase.assignOrder(1L, "chef1", "nit123");
+
+        // Assert
+        assertEquals("chef1", result.getIdChef());
+        assertEquals(DomainConstants.ORDER_STATUS_IN_PROGRESS, result.getEstado());
+        verify(orderPersistencePort).updateOrder(any(Order.class));
+    }
+
+    @Test
+    public void test_assign_nonexistent_order_throws_exception() {
+        when(orderPersistencePort.getOrderById(1L)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(OrderNotFoundException.class, () -> {
+            orderUseCase.assignOrder(1L, "chef1", "nit123");
+        });
+
+        verify(orderPersistencePort).getOrderById(1L);
+        verify(orderPersistencePort, never()).updateOrder(any(Order.class));
+    }
+
+    @Test
+    public void test_assign_order_already_assigned_throws_exception() {
+        Order mockOrder = new Order(1L, "client1", "nit123", LocalDateTime.now(),
+                DomainConstants.ORDER_STATUS_PENDING, "chef1", new ArrayList<>());
+
+        when(orderPersistencePort.getOrderById(1L)).thenReturn(Optional.of(mockOrder));
+
+        // Act & Assert
+        assertThrows(OrderAlreadyAssignedException.class, () -> {
+            orderUseCase.assignOrder(1L, "chef2", "nit123");
+        });
+    }
+
+    @Test
+    public void test_assign_order_different_restaurant_throws_exception() {
+        Order mockOrder = new Order(1L, "client1", "nit123", LocalDateTime.now(),
+                DomainConstants.ORDER_STATUS_PENDING, null, new ArrayList<>());
+
+        when(orderPersistencePort.getOrderById(1L)).thenReturn(Optional.of(mockOrder));
+
+        // Act & Assert
+        assertThrows(OrderAssignmentNotAllowedException.class, () -> {
+            orderUseCase.assignOrder(1L, "chef1", "differentNit");
+        });
     }
 }

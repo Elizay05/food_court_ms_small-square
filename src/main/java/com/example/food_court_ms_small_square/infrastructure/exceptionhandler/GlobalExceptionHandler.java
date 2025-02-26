@@ -1,9 +1,6 @@
 package com.example.food_court_ms_small_square.infrastructure.exceptionhandler;
 
-import com.example.food_court_ms_small_square.domain.exception.InvalidArgumentsException;
-import com.example.food_court_ms_small_square.domain.exception.OrderInProgressException;
-import com.example.food_court_ms_small_square.domain.exception.OwnerInvalidException;
-import com.example.food_court_ms_small_square.domain.exception.ElementAlreadyExistsException;
+import com.example.food_court_ms_small_square.domain.exception.*;
 import com.example.food_court_ms_small_square.infrastructure.exception.NoSuchElementException;
 import com.example.food_court_ms_small_square.infrastructure.exception.UnauthorizedException;
 import org.springframework.http.HttpStatus;
@@ -62,5 +59,23 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ExceptionResponse> handleOrderInProgressException(OrderInProgressException ex) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(ex.getMessage(), HttpStatus.BAD_REQUEST.toString(), LocalDateTime.now());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
+    }
+
+    @ExceptionHandler(OrderNotFoundException.class)
+    public ResponseEntity<ExceptionResponse> handleOrderNotFoundException(OrderNotFoundException ex) {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(ex.getMessage(), HttpStatus.NOT_FOUND.toString(), LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse);
+    }
+
+    @ExceptionHandler(OrderAlreadyAssignedException.class)
+    public ResponseEntity<ExceptionResponse> handleOrderAlreadyAssignedException(OrderAlreadyAssignedException ex) {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(ex.getMessage(), HttpStatus.CONFLICT.toString(), LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(exceptionResponse);
+    }
+
+    @ExceptionHandler(OrderAssignmentNotAllowedException.class)
+    public ResponseEntity<ExceptionResponse> handleOrderAssignmentNotAllowedException(OrderAssignmentNotAllowedException ex) {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(ex.getMessage(), HttpStatus.FORBIDDEN.toString(), LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(exceptionResponse);
     }
 }

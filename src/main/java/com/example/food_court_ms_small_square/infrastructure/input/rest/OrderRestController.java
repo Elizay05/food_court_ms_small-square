@@ -72,4 +72,24 @@ public class OrderRestController {
         PageResponseDto<OrderResponseDto> orders = orderHandler.listOrdersByFilters(estado, page, size);
         return ResponseEntity.ok(orders);
     }
+
+    @Operation(
+            summary = "Assign an order to the authenticated employee",
+            description = "Allows an employee to take responsibility for a specific order."
+    )
+    @ApiResponse(responseCode = "200", description = "Order successfully assigned",
+            content = @Content(mediaType = "application/json"))
+    @ApiResponse(responseCode = "403", description = "Forbidden - User lacks necessary permissions",
+            content = @Content(mediaType = "application/json"))
+    @ApiResponse(responseCode = "404", description = "Order not found",
+            content = @Content(mediaType = "application/json"))
+    @ApiResponse(responseCode = "500", description = "Internal server error",
+            content = @Content(mediaType = "application/json"))
+    @PatchMapping("/{orderId}/assign")
+    @PreAuthorize("hasRole('ROLE_Employee')")
+    public ResponseEntity<OrderResponseDto> assignOrder(@PathVariable Long orderId) {
+        OrderResponseDto orderResponseDto = orderHandler.assignOrder(orderId);
+        return ResponseEntity.ok().body(orderResponseDto);
+    }
+
 }

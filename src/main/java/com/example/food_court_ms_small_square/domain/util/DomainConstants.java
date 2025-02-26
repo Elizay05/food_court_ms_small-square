@@ -11,4 +11,5 @@ public class DomainConstants {
 
     public static final String ORDER_STATUS_PENDING = "PENDIENTE";
     public static final String ORDER_STATUS_IN_PROGRESS = "EN PREPARACIÓN";
+    public static final String ORDER_STATUS_READY = "LISTO";
 }
