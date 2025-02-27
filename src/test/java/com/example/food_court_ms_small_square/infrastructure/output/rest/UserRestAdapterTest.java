@@ -251,4 +251,85 @@ public class UserRestAdapterTest {
 
         assertEquals("Error al actualizar el NIT en el microservicio de usuarios: Generic REST client exception", exception.getMessage());
     }
+
+    @Test
+    public void test_get_phone_number_success() {
+        RestTemplate restTemplate = mock(RestTemplate.class);
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        UserRestAdapter userRestAdapter = new UserRestAdapter(restTemplate, request);
+
+        String documentNumber = "123456789";
+        String expectedPhone = "+573001234567";
+        String token = "Bearer token123";
+
+        when(request.getHeader("Authorization")).thenReturn(token);
+
+        ResponseEntity<String> responseEntity = new ResponseEntity<>(expectedPhone, HttpStatus.OK);
+        when(restTemplate.exchange(
+                contains(documentNumber),
+                eq(HttpMethod.GET),
+                any(HttpEntity.class),
+                eq(String.class)
+        )).thenReturn(responseEntity);
+
+        String result = userRestAdapter.getPhoneNumberByDocumentNumber(documentNumber);
+
+        assertEquals(expectedPhone, result);
+        verify(request).getHeader("Authorization");
+        verify(restTemplate).exchange(
+                contains(documentNumber),
+                eq(HttpMethod.GET),
+                any(HttpEntity.class),
+                eq(String.class)
+        );
+    }
+
+    @Test
+    public void test_get_phone_number_no_auth_token() {
+        RestTemplate restTemplate = mock(RestTemplate.class);
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        UserRestAdapter userRestAdapter = new UserRestAdapter(restTemplate, request);
+
+        String documentNumber = "123456789";
+        when(request.getHeader("Authorization")).thenReturn(null);
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () ->
+                userRestAdapter.getPhoneNumberByDocumentNumber(documentNumber)
+        );
+
+        assertEquals("No se encontró un token de autenticación válido", exception.getMessage());
+        verify(request).getHeader("Authorization");
+        verifyNoInteractions(restTemplate);
+    }
+
+    @Test
+    public void test_get_phone_number_exception() {
+        RestTemplate restTemplate = mock(RestTemplate.class);
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        UserRestAdapter userRestAdapter = new UserRestAdapter(restTemplate, request);
+
+        String documentNumber = "123456789";
+        String token = "Bearer token123";
+
+        when(request.getHeader("Authorization")).thenReturn(token);
+        when(restTemplate.exchange(
+                contains(documentNumber),
+                eq(HttpMethod.GET),
+                any(HttpEntity.class),
+                eq(String.class)
+        )).thenThrow(new RuntimeException("Simulated exception"));
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () ->
+                userRestAdapter.getPhoneNumberByDocumentNumber(documentNumber)
+        );
+
+        assertTrue(exception.getMessage().contains("Error al obtener el número telefónico: Simulated exception"));
+        verify(request).getHeader("Authorization");
+        verify(restTemplate).exchange(
+                contains(documentNumber),
+                eq(HttpMethod.GET),
+                any(HttpEntity.class),
+                eq(String.class)
+        );
+    }
 }

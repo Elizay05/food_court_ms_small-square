@@ -78,4 +78,10 @@ public class GlobalExceptionHandler {
         ExceptionResponse exceptionResponse = new ExceptionResponse(ex.getMessage(), HttpStatus.FORBIDDEN.toString(), LocalDateTime.now());
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(exceptionResponse);
     }
+
+    @ExceptionHandler(OrderAlreadyReadyException.class)
+    public ResponseEntity<ExceptionResponse> handleOrderAlreadyReadyException(OrderAlreadyReadyException ex) {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(ex.getMessage(), HttpStatus.CONFLICT.toString(), LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(exceptionResponse);
+    }
 }

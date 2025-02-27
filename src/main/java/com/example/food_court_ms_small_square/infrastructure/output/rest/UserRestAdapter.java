@@ -66,4 +66,27 @@ public class UserRestAdapter implements IUserValidationPersistencePort {
             throw new RuntimeException("Error al actualizar el NIT en el microservicio de usuarios: " + e.getMessage());
         }
     }
+
+    @Override
+    public String getPhoneNumberByDocumentNumber(String documentNumber) {
+        String url = DomainConstants.URL_GET_PHONE_BY_DOCUMENT.replace("{documentNumber}", documentNumber);
+
+        String token = request.getHeader("Authorization");
+
+        if (token == null || token.isEmpty()) {
+            throw new RuntimeException("No se encontró un token de autenticación válido");
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", token);
+
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+            return response.getBody();
+        } catch (Exception e) {
+            throw new RuntimeException("Error al obtener el número telefónico: " + e.getMessage());
+        }
+    }
 }

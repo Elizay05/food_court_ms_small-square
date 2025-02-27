@@ -91,5 +91,10 @@ public class OrderRestController {
         OrderResponseDto orderResponseDto = orderHandler.assignOrder(orderId);
         return ResponseEntity.ok().body(orderResponseDto);
     }
-
+    @PatchMapping("/{orderId}/ready")
+    @PreAuthorize("hasRole('ROLE_Employee')")
+    public ResponseEntity<OrderResponseDto> readyOrder(@PathVariable Long orderId) {
+        OrderResponseDto orderResponseDto = orderHandler.readyOrder(orderId);
+        return ResponseEntity.ok().body(orderResponseDto);
+    }
 }

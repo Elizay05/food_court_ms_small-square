@@ -5,7 +5,6 @@ import com.example.food_court_ms_small_square.application.dto.request.OrderReque
 import com.example.food_court_ms_small_square.application.dto.response.OrderResponseDto;
 import com.example.food_court_ms_small_square.application.dto.response.PageResponseDto;
 import com.example.food_court_ms_small_square.application.handler.impl.OrderHandler;
-import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -16,7 +15,8 @@ import org.springframework.http.ResponseEntity;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -108,38 +108,5 @@ public class OrderRestControllerTest {
         assertNotNull(response.getBody());
         assertEquals(orderId, response.getBody().getId());
         verify(orderHandler).assignOrder(orderId);
-    }
-
-    @Test
-    public void test_employee_successfully_marks_order_ready() {
-        // Arrange
-        Long orderId = 1L;
-        OrderResponseDto expectedResponse = new OrderResponseDto();
-        expectedResponse.setId(orderId);
-        expectedResponse.setEstado("READY");
-
-        when(orderHandler.readyOrder(orderId)).thenReturn(expectedResponse);
-
-        // Act
-        ResponseEntity<OrderResponseDto> response = orderRestController.readyOrder(orderId);
-
-        // Assert
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(expectedResponse, response.getBody());
-        verify(orderHandler).readyOrder(orderId);
-    }
-
-    @Test
-    public void test_mark_nonexistent_order_ready() {
-        // Arrange
-        Long nonExistentOrderId = 999L;
-        when(orderHandler.readyOrder(nonExistentOrderId))
-                .thenThrow(new EntityNotFoundException("Order not found with id: " + nonExistentOrderId));
-
-        // Act & Assert
-        assertThrows(EntityNotFoundException.class, () -> {
-            orderRestController.readyOrder(nonExistentOrderId);
-        });
-        verify(orderHandler).readyOrder(nonExistentOrderId);
     }
 }
