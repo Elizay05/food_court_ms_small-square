@@ -8,4 +8,5 @@ public interface IOrderHandler {
     OrderResponseDto saveOrder(OrderRequestDto orderRequestDto);
     PageResponseDto<OrderResponseDto> listOrdersByFilters(String estado, int page, int size);
     OrderResponseDto assignOrder(Long orderId);
+    OrderResponseDto readyOrder(Long orderId);
 }

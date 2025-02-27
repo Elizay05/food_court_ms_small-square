@@ -190,4 +190,62 @@ public class OrderHandlerTest {
         verify(orderServicePort).assignOrder(orderId, documentNumber, nit);
         verify(orderRequestMapper, never()).toResponseDto((Order) any());
     }
+
+    @Test
+    public void test_ready_order_success() {
+        // Arrange
+        Long orderId = 1L;
+        String nit = "123456789";
+
+        OrderHandler orderHandler = new OrderHandler(orderServicePort, orderRequestMapper);
+
+        Authentication authentication = mock(Authentication.class);
+        SecurityContext securityContext = mock(SecurityContext.class);
+        CustomUserDetails userDetails = new CustomUserDetails("user", "doc123", nit, Collections.emptyList());
+
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn(userDetails);
+        SecurityContextHolder.setContext(securityContext);
+
+        Order order = new Order(orderId, "client1", nit, LocalDateTime.now(), "READY", "chef1", Collections.emptyList());
+        OrderResponseDto expectedResponse = new OrderResponseDto(orderId, "client1", nit, LocalDateTime.now(), "READY", "chef1", Collections.emptyList());
+
+        when(orderServicePort.readyOrder(orderId, nit)).thenReturn(order);
+        when(orderRequestMapper.toResponseDto(order)).thenReturn(expectedResponse);
+
+        // Act
+        OrderResponseDto result = orderHandler.readyOrder(orderId);
+
+        // Assert
+        assertEquals(expectedResponse, result);
+        verify(orderServicePort).readyOrder(orderId, nit);
+        verify(orderRequestMapper).toResponseDto(order);
+    }
+
+    @Test
+    public void test_ready_order_null_id() {
+        // Arrange
+        Long orderId = null;
+        String nit = "123456789";
+
+        OrderHandler orderHandler = new OrderHandler(orderServicePort, orderRequestMapper);
+
+        Authentication authentication = mock(Authentication.class);
+        SecurityContext securityContext = mock(SecurityContext.class);
+        CustomUserDetails userDetails = new CustomUserDetails("user", "doc123", nit, Collections.emptyList());
+
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn(userDetails);
+        SecurityContextHolder.setContext(securityContext);
+
+        when(orderServicePort.readyOrder(orderId, nit)).thenThrow(new IllegalArgumentException("Order ID cannot be null"));
+
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> {
+            orderHandler.readyOrder(orderId);
+        });
+
+        verify(orderServicePort).readyOrder(orderId, nit);
+        verify(orderRequestMapper, never()).toResponseDto((Order) any());
+    }
 }

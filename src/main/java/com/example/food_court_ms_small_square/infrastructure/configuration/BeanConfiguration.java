@@ -3,10 +3,7 @@ package com.example.food_court_ms_small_square.infrastructure.configuration;
 import com.example.food_court_ms_small_square.domain.api.IDishServicePort;
 import com.example.food_court_ms_small_square.domain.api.IOrderServicePort;
 import com.example.food_court_ms_small_square.domain.api.IRestaurantServicePort;
-import com.example.food_court_ms_small_square.domain.spi.IDishPersistencePort;
-import com.example.food_court_ms_small_square.domain.spi.IOrderPersistencePort;
-import com.example.food_court_ms_small_square.domain.spi.IRestaurantPersistencePort;
-import com.example.food_court_ms_small_square.domain.spi.IUserValidationPersistencePort;
+import com.example.food_court_ms_small_square.domain.spi.*;
 import com.example.food_court_ms_small_square.domain.usecase.DishUseCase;
 import com.example.food_court_ms_small_square.domain.usecase.OrderUseCase;
 import com.example.food_court_ms_small_square.domain.usecase.RestaurantUseCase;
@@ -21,6 +18,7 @@ import com.example.food_court_ms_small_square.infrastructure.output.jpa.reposito
 import com.example.food_court_ms_small_square.infrastructure.output.jpa.repository.IOrderDishRepository;
 import com.example.food_court_ms_small_square.infrastructure.output.jpa.repository.IOrderRepository;
 import com.example.food_court_ms_small_square.infrastructure.output.jpa.repository.IRestaurantRepository;
+import com.example.food_court_ms_small_square.infrastructure.output.rest.MessageRestAdapter;
 import com.example.food_court_ms_small_square.infrastructure.output.rest.UserRestAdapter;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -52,6 +50,11 @@ public class BeanConfiguration {
     }
 
     @Bean
+    public IMessagePersistencePort messagePersistencePort(RestTemplate restTemplate, HttpServletRequest httpServletRequest) {
+        return new MessageRestAdapter(restTemplate, httpServletRequest);
+    }
+
+    @Bean
     public IRestaurantServicePort restaurantServicePort(IUserValidationPersistencePort userValidationPersistencePort) {
         return new RestaurantUseCase(restaurantPersistencePort(), userValidationPersistencePort);
     }
@@ -77,7 +80,7 @@ public class BeanConfiguration {
     }
 
     @Bean
-    public IOrderServicePort orderServicePort() {
-        return new OrderUseCase(orderPersistencePort());
+    public IOrderServicePort orderServicePort(IUserValidationPersistencePort userValidationPersistencePort, IMessagePersistencePort messagePersistencePort) {
+        return new OrderUseCase(orderPersistencePort(),  userValidationPersistencePort, messagePersistencePort);
     }
 }

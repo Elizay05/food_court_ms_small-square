@@ -59,4 +59,12 @@ public class OrderHandler implements IOrderHandler {
         Order order = orderServicePort.assignOrder(orderId, userDetails.getDocumentNumber(), userDetails.getNit());
         return orderRequestMapper.toResponseDto(order);
     }
+
+    @Override
+    public OrderResponseDto readyOrder(Long orderId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Order order = orderServicePort.readyOrder(orderId, userDetails.getNit());
+        return orderRequestMapper.toResponseDto(order);
+    }
 }

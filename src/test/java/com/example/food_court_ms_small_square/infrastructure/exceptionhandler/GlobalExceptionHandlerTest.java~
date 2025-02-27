@@ -142,15 +142,4 @@ public class GlobalExceptionHandlerTest {
         assertEquals("No tienes permisos para asignar esta orden.", response.getBody().getMessage());
         assertEquals(HttpStatus.FORBIDDEN.toString(), response.getBody().getStatus());
     }
-
-    @Test
-    void shouldHandleOrderAlreadyReadyException() {
-        OrderAlreadyReadyException exception = new OrderAlreadyReadyException("La orden ya esta lista.");
-
-        ResponseEntity<ExceptionResponse> response = globalExceptionHandler.handleOrderAlreadyReadyException(exception);
-
-        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
-        assertEquals("La orden ya esta lista.", response.getBody().getMessage());
-        assertEquals(HttpStatus.CONFLICT.toString(), response.getBody().getStatus());
-    }
 }
