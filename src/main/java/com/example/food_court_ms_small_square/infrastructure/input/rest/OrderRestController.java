@@ -112,6 +112,29 @@ public class OrderRestController {
         return ResponseEntity.ok().body(orderResponseDto);
     }
 
+    @Operation(
+            summary = "Mark an order as delivered",
+            description = "Allows an authenticated employee to update an order's status to 'delivered' using a PIN."
+    )
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "PIN required to confirm order delivery",
+            required = true,
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = PinRequestDto.class)
+            )
+    )
+    @ApiResponse(responseCode = "200", description = "Order successfully marked as delivered",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = OrderResponseDto.class)))
+    @ApiResponse(responseCode = "400", description = "Invalid PIN provided",
+            content = @Content(mediaType = "application/json"))
+    @ApiResponse(responseCode = "403", description = "Forbidden - User lacks necessary permissions",
+            content = @Content(mediaType = "application/json"))
+    @ApiResponse(responseCode = "404", description = "Order not found",
+            content = @Content(mediaType = "application/json"))
+    @ApiResponse(responseCode = "500", description = "Internal server error",
+            content = @Content(mediaType = "application/json"))
     @PatchMapping("/{orderId}/delivered")
     @PreAuthorize("hasRole('ROLE_Employee')")
     public ResponseEntity<OrderResponseDto> deliveredOrder(@PathVariable Long orderId, @RequestBody PinRequestDto pinRequestDto) {
@@ -119,6 +142,19 @@ public class OrderRestController {
         return ResponseEntity.ok().body(orderResponseDto);
     }
 
+    @Operation(
+            summary = "Cancel an order",
+            description = "Allows an authenticated customer to cancel their order if it has not been prepared."
+    )
+    @ApiResponse(responseCode = "204", description = "Order successfully canceled")
+    @ApiResponse(responseCode = "400", description = "Order cannot be canceled at this stage",
+            content = @Content(mediaType = "application/json"))
+    @ApiResponse(responseCode = "403", description = "Forbidden - User lacks necessary permissions",
+            content = @Content(mediaType = "application/json"))
+    @ApiResponse(responseCode = "404", description = "Order not found",
+            content = @Content(mediaType = "application/json"))
+    @ApiResponse(responseCode = "500", description = "Internal server error",
+            content = @Content(mediaType = "application/json"))
     @DeleteMapping("/{orderId}")
     @PreAuthorize("hasRole('ROLE_Customer')")
     public ResponseEntity<Void> cancelOrder(@PathVariable Long orderId) {

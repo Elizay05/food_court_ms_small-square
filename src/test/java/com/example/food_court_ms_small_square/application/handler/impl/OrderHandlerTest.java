@@ -248,4 +248,82 @@ public class OrderHandlerTest {
         verify(orderServicePort).readyOrder(orderId, nit);
         verify(orderRequestMapper, never()).toResponseDto((Order) any());
     }
+
+    @Test
+    public void test_delivered_order_success() {
+        // Arrange
+        Long orderId = 1L;
+        String pin = "1234";
+        String nit = "123456789";
+
+        Order order = new Order(orderId, "client1", nit, LocalDateTime.now(), "DELIVERED", "chef1", pin, new ArrayList<>());
+        OrderResponseDto expectedResponse = new OrderResponseDto(orderId, "client1", nit, LocalDateTime.now(), "DELIVERED", "chef1", pin, new ArrayList<>());
+
+        Authentication authentication = mock(Authentication.class);
+        SecurityContext securityContext = mock(SecurityContext.class);
+        CustomUserDetails userDetails = new CustomUserDetails("user1", "doc1", nit, new ArrayList<>());
+
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn(userDetails);
+        SecurityContextHolder.setContext(securityContext);
+
+        when(orderServicePort.deliveredOrder(orderId, pin, nit)).thenReturn(order);
+        when(orderRequestMapper.toResponseDto(order)).thenReturn(expectedResponse);
+
+        // Act
+        OrderResponseDto result = orderHandler.deliveredOrder(orderId, pin);
+
+        // Assert
+        assertEquals(expectedResponse, result);
+        verify(orderServicePort).deliveredOrder(orderId, pin, nit);
+        verify(orderRequestMapper).toResponseDto(order);
+    }
+
+    @Test
+    public void test_delivered_order_null_id() {
+        // Arrange
+        Long orderId = null;
+        String pin = "1234";
+        String nit = "123456789";
+
+        Authentication authentication = mock(Authentication.class);
+        SecurityContext securityContext = mock(SecurityContext.class);
+        CustomUserDetails userDetails = new CustomUserDetails("user1", "doc1", nit, new ArrayList<>());
+
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn(userDetails);
+        SecurityContextHolder.setContext(securityContext);
+
+        when(orderServicePort.deliveredOrder(orderId, pin, nit)).thenThrow(new IllegalArgumentException("Order ID cannot be null"));
+
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> {
+            orderHandler.deliveredOrder(orderId, pin);
+        });
+
+        verify(orderServicePort).deliveredOrder(orderId, pin, nit);
+        verifyNoInteractions(orderRequestMapper);
+    }
+
+    @Test
+    public void test_cancel_order_success() {
+        // Arrange
+        Long orderId = 1L;
+        String documentNumber = "12345";
+
+        Authentication authentication = mock(Authentication.class);
+        CustomUserDetails userDetails = new CustomUserDetails("user", documentNumber, "nit", Collections.emptyList());
+
+        SecurityContext securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn(userDetails);
+
+        // Act
+        orderHandler.cancelOrder(orderId);
+
+        // Assert
+        verify(orderServicePort).cancelOrder(orderId, documentNumber);
+    }
 }

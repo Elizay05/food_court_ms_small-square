@@ -387,4 +387,69 @@ public class OrderUseCaseTest {
             orderUseCase.deliveredOrder(1L, "654321", "nit123");
         });
     }
+    @Test
+    public void test_cancel_order_success_when_client_owns_pending_order() {
+        // Arrange
+        Long orderId = 1L;
+        String documentNumber = "123";
+        Order order = new Order(orderId, documentNumber, "nit1", LocalDateTime.now(),
+                DomainConstants.ORDER_STATUS_PENDING, null, null, null);
+
+        when(orderPersistencePort.getOrderById(orderId)).thenReturn(Optional.of(order));
+
+        // Act
+        orderUseCase.cancelOrder(orderId, documentNumber);
+
+        // Assert
+        verify(orderPersistencePort).deleteOrder(orderId);
+    }
+
+    @Test
+    public void test_cancel_nonexistent_order_throws_exception() {
+        // Arrange
+        Long orderId = 1L;
+        String documentNumber = "123";
+
+        when(orderPersistencePort.getOrderById(orderId)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(OrderNotFoundException.class, () -> {
+            orderUseCase.cancelOrder(orderId, documentNumber);
+        });
+
+        verify(orderPersistencePort, never()).deleteOrder(any());
+    }
+
+    @Test
+    public void test_cancel_order_with_different_client_id_throws_exception() {
+        // Arrange
+        Long orderId = 1L;
+        String documentNumber = "123";
+        String differentDocumentNumber = "456";
+        Order order = new Order(orderId, documentNumber, "nit1", LocalDateTime.now(),
+                DomainConstants.ORDER_STATUS_PENDING, null, null, null);
+
+        when(orderPersistencePort.getOrderById(orderId)).thenReturn(Optional.of(order));
+
+        // Act & Assert
+        assertThrows(OrderAssignmentNotAllowedException.class, () -> {
+            orderUseCase.cancelOrder(orderId, differentDocumentNumber);
+        });
+    }
+
+    @Test
+    public void test_cancel_order_throws_exception_when_status_not_pending() {
+        // Arrange
+        Long orderId = 1L;
+        String documentNumber = "123";
+        Order order = new Order(orderId, documentNumber, "nit1", LocalDateTime.now(),
+                DomainConstants.ORDER_STATUS_IN_PROGRESS, null, null, null);
+
+        when(orderPersistencePort.getOrderById(orderId)).thenReturn(Optional.of(order));
+
+        // Act & Assert
+        assertThrows(InvalidOrderStatusException.class, () -> {
+            orderUseCase.cancelOrder(orderId, documentNumber);
+        });
+    }
 }
