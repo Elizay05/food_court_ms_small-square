@@ -7,7 +7,6 @@ import com.example.food_court_ms_small_square.domain.model.OrderDish;
 import com.example.food_court_ms_small_square.domain.model.Page;
 import com.example.food_court_ms_small_square.domain.spi.IMessagePersistencePort;
 import com.example.food_court_ms_small_square.domain.spi.IOrderPersistencePort;
-import com.example.food_court_ms_small_square.domain.spi.ITraceabilityPersistencePort;
 import com.example.food_court_ms_small_square.domain.spi.IUserValidationPersistencePort;
 import com.example.food_court_ms_small_square.domain.util.DomainConstants;
 import com.example.food_court_ms_small_square.infrastructure.configuration.security.CustomUserDetails;
@@ -37,9 +36,6 @@ public class OrderUseCaseTest {
 
     @Mock
     private IMessagePersistencePort messagePersistencePort;
-
-    @Mock
-    private ITraceabilityPersistencePort traceabilityPersistencePort;
 
     @InjectMocks
     private OrderUseCase orderUseCase;
@@ -116,6 +112,8 @@ public class OrderUseCaseTest {
 
     @Test
     public void test_list_orders_with_status_filter() {
+        OrderUseCase orderUseCase = new OrderUseCase(orderPersistencePort, userValidationPersistencePort, messagePersistencePort);
+
         String status = "PENDING";
         String nit = "123456789";
         PageRequestDto pageRequest = new PageRequestDto(0, 10, "id", true);
@@ -139,6 +137,8 @@ public class OrderUseCaseTest {
 
     @Test
     public void test_list_orders_with_null_status() {
+        OrderUseCase orderUseCase = new OrderUseCase(orderPersistencePort, userValidationPersistencePort, messagePersistencePort);
+
         String nit = "123456789";
         PageRequestDto pageRequest = new PageRequestDto(0, 10, "id", true);
 
