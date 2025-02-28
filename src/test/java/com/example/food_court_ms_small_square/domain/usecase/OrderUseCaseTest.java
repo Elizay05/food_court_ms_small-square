@@ -44,7 +44,7 @@ public class OrderUseCaseTest {
     public void test_save_order_success() {
         // Arrange
         List<OrderDish> dishes = Arrays.asList(new OrderDish(1L, 2));
-        Order order = new Order(null, null, "123456789", null, null, null, dishes);
+        Order order = new Order(null, null, "123456789", null, null, null, "123456", dishes);
 
         Authentication auth = mock(Authentication.class);
         SecurityContext securityContext = mock(SecurityContext.class);
@@ -72,7 +72,7 @@ public class OrderUseCaseTest {
     public void test_save_order_invalid_dishes() {
         // Arrange
         List<OrderDish> dishes = Arrays.asList(new OrderDish(1L, 2));
-        Order order = new Order(null, null, "123456789", null, null, null, dishes);
+        Order order = new Order(null, null, "123456789", null, null, null, "123456", dishes);
 
         Authentication auth = mock(Authentication.class);
         SecurityContext securityContext = mock(SecurityContext.class);
@@ -93,7 +93,7 @@ public class OrderUseCaseTest {
     public void test_save_order_throws_order_in_progress_exception() {
         // Arrange
         List<OrderDish> dishes = Arrays.asList(new OrderDish(1L, 2));
-        Order order = new Order(null, null, "123456789", null, null, null, dishes);
+        Order order = new Order(null, null, "123456789", null, null, null, "123456", dishes);
 
         Authentication auth = mock(Authentication.class);
         SecurityContext securityContext = mock(SecurityContext.class);
@@ -118,8 +118,8 @@ public class OrderUseCaseTest {
         String nit = "123456789";
         PageRequestDto pageRequest = new PageRequestDto(0, 10, "id", true);
 
-        List<Order> orders = Arrays.asList(new Order(1L, "111", "222", LocalDateTime.now(), "PENDING", "123456789", new ArrayList<>()),
-                new Order(2L, "111", "222", LocalDateTime.now(), "PENDING", "123456789", new ArrayList<>()));
+        List<Order> orders = Arrays.asList(new Order(1L, "111", "222", LocalDateTime.now(), "PENDING", "123456789", "123456", new ArrayList<>()),
+                new Order(2L, "111", "222", LocalDateTime.now(), "PENDING", "123456789", "123456", new ArrayList<>()));
         Page<Order> expectedPage = new Page<>(orders, 1, 2);
 
         when(orderPersistencePort.listOrdersByFilters(nit, status, pageRequest))
@@ -142,9 +142,9 @@ public class OrderUseCaseTest {
         String nit = "123456789";
         PageRequestDto pageRequest = new PageRequestDto(0, 10, "id", true);
 
-        List<Order> orders = Arrays.asList(new Order(1L, "111", "222", LocalDateTime.now(), "PENDING", "123456789", new ArrayList<>()),
-                new Order(2L, "111", "222", LocalDateTime.now(), "PENDING", "123456789", new ArrayList<>()),
-                new Order(3L, "111", "222", LocalDateTime.now(), "PENDING", "123456789", new ArrayList<>()));
+        List<Order> orders = Arrays.asList(new Order(1L, "111", "222", LocalDateTime.now(), "PENDING", "123456789", "123456", new ArrayList<>()),
+                new Order(2L, "111", "222", LocalDateTime.now(), "PENDING", "123456789", "123456", new ArrayList<>()),
+                new Order(3L, "111", "222", LocalDateTime.now(), "PENDING", "123456789", "123456", new ArrayList<>()));
         Page<Order> expectedPage = new Page<>(orders, 1, 3);
 
         when(orderPersistencePort.listOrdersByFilters(nit, null, pageRequest))
@@ -163,7 +163,7 @@ public class OrderUseCaseTest {
     @Test
     public void test_assign_order_success() {
         Order mockOrder = new Order(1L, "client1", "nit123", LocalDateTime.now(),
-                DomainConstants.ORDER_STATUS_PENDING, null, new ArrayList<>());
+                DomainConstants.ORDER_STATUS_PENDING, null, "123456", new ArrayList<>());
 
         when(orderPersistencePort.getOrderById(1L)).thenReturn(Optional.of(mockOrder));
         when(orderPersistencePort.updateOrder(any(Order.class))).thenReturn(mockOrder);
@@ -191,22 +191,22 @@ public class OrderUseCaseTest {
     }
 
     @Test
-    public void test_assign_order_already_assigned_throws_exception() {
-        Order mockOrder = new Order(1L, "client1", "nit123", LocalDateTime.now(),
-                DomainConstants.ORDER_STATUS_PENDING, "chef1", new ArrayList<>());
+    public void test_assign_order_with_non_pending_status() {
+        Order order = new Order(1L, "client1", "nit123", LocalDateTime.now(),
+                DomainConstants.ORDER_STATUS_READY, null, "123456", new ArrayList<>());
 
-        when(orderPersistencePort.getOrderById(1L)).thenReturn(Optional.of(mockOrder));
+        when(orderPersistencePort.getOrderById(1L)).thenReturn(Optional.of(order));
 
         // Act & Assert
-        assertThrows(OrderAlreadyAssignedException.class, () -> {
-            orderUseCase.assignOrder(1L, "chef2", "nit123");
+        assertThrows(InvalidOrderStatusException.class, () -> {
+            orderUseCase.assignOrder(1L, "chef1", "nit123");
         });
     }
 
     @Test
     public void test_assign_order_different_restaurant_throws_exception() {
         Order mockOrder = new Order(1L, "client1", "nit123", LocalDateTime.now(),
-                DomainConstants.ORDER_STATUS_PENDING, null, new ArrayList<>());
+                DomainConstants.ORDER_STATUS_PENDING, null, "123456", new ArrayList<>());
 
         when(orderPersistencePort.getOrderById(1L)).thenReturn(Optional.of(mockOrder));
 
@@ -217,29 +217,28 @@ public class OrderUseCaseTest {
     }
 
     @Test
-    public void test_ready_order_success() {
+    public void test_mark_order_as_ready_success() {
         // Arrange
         Long orderId = 1L;
-        String nitRestaurant = "123456";
+        String nitRestaurant = "123456789";
         String clientId = "C001";
-        String chefId = "CHEF1";
         String phoneNumber = "1234567890";
 
-        Order order = new Order(orderId, clientId, nitRestaurant, LocalDateTime.now(),
-                DomainConstants.ORDER_STATUS_IN_PROGRESS, chefId, new ArrayList<>());
+        Order mockOrder = new Order(orderId, clientId, nitRestaurant, LocalDateTime.now(),
+                DomainConstants.ORDER_STATUS_IN_PROGRESS, "CHEF1", null, new ArrayList<>());
 
-        when(orderPersistencePort.getOrderById(orderId)).thenReturn(Optional.of(order));
+        when(orderPersistencePort.getOrderById(orderId)).thenReturn(Optional.of(mockOrder));
         when(userValidationPersistencePort.getPhoneNumberByDocumentNumber(clientId)).thenReturn(phoneNumber);
-        when(orderPersistencePort.updateOrder(any(Order.class))).thenReturn(order);
+        when(orderPersistencePort.updateOrder(any(Order.class))).thenReturn(mockOrder);
 
         // Act
         Order result = orderUseCase.readyOrder(orderId, nitRestaurant);
 
         // Assert
         assertEquals(DomainConstants.ORDER_STATUS_READY, result.getEstado());
-        verify(messagePersistencePort).sendOrderReadyMessage(eq(phoneNumber),
-                eq(String.format(DomainConstants.MESSAGE_READY_ORDER, orderId)));
-        verify(orderPersistencePort).updateOrder(order);
+        assertNotNull(result.getPin());
+        verify(messagePersistencePort).sendOrderReadyMessage(eq(phoneNumber), anyString());
+        verify(orderPersistencePort).updateOrder(any(Order.class));
     }
 
     @Test
@@ -262,27 +261,6 @@ public class OrderUseCaseTest {
     }
 
     @Test
-    public void test_ready_order_not_assigned_to_chef() {
-        // Arrange
-        Long orderId = 1L;
-        String nitRestaurant = "123456";
-        String clientId = "C001";
-
-        Order order = new Order(orderId, clientId, nitRestaurant, LocalDateTime.now(),
-                DomainConstants.ORDER_STATUS_IN_PROGRESS, null, new ArrayList<>());
-
-        when(orderPersistencePort.getOrderById(orderId)).thenReturn(Optional.of(order));
-
-        // Act & Assert
-        assertThrows(OrderNotAssignedException.class, () -> {
-            orderUseCase.readyOrder(orderId, nitRestaurant);
-        });
-
-        verify(orderPersistencePort, never()).updateOrder(any(Order.class));
-        verify(messagePersistencePort, never()).sendOrderReadyMessage(anyString(), anyString());
-    }
-
-    @Test
     public void test_ready_order_wrong_nit() {
         // Arrange
         Long orderId = 1L;
@@ -292,7 +270,7 @@ public class OrderUseCaseTest {
         String chefId = "CHEF1";
 
         Order order = new Order(orderId, clientId, correctNitRestaurant, LocalDateTime.now(),
-                DomainConstants.ORDER_STATUS_IN_PROGRESS, chefId, new ArrayList<>());
+                DomainConstants.ORDER_STATUS_IN_PROGRESS, chefId, "123456", new ArrayList<>());
 
         when(orderPersistencePort.getOrderById(orderId)).thenReturn(Optional.of(order));
 
@@ -314,7 +292,7 @@ public class OrderUseCaseTest {
         String chefId = "CHEF1";
 
         Order order = new Order(orderId, clientId, nitRestaurant, LocalDateTime.now(),
-                DomainConstants.ORDER_STATUS_READY, chefId, new ArrayList<>());
+                DomainConstants.ORDER_STATUS_READY, chefId, "123456", new ArrayList<>());
 
         when(orderPersistencePort.getOrderById(orderId)).thenReturn(Optional.of(order));
 
@@ -325,5 +303,88 @@ public class OrderUseCaseTest {
 
         verify(orderPersistencePort, never()).updateOrder(any(Order.class));
         verify(messagePersistencePort, never()).sendOrderReadyMessage(anyString(), anyString());
+    }
+
+    @Test
+    public void test_ready_order_invalid_status_exception() {
+        // Arrange
+        Long orderId = 1L;
+        String nitRestaurant = "123456";
+        String clientId = "C001";
+        String chefId = "CHEF1";
+
+        Order order = new Order(orderId, clientId, nitRestaurant, LocalDateTime.now(),
+                DomainConstants.ORDER_STATUS_PENDING, chefId, "123456", new ArrayList<>());
+
+        when(orderPersistencePort.getOrderById(orderId)).thenReturn(Optional.of(order));
+
+        // Act & Assert
+        assertThrows(InvalidOrderStatusException.class, () -> {
+            orderUseCase.readyOrder(orderId, nitRestaurant);
+        });
+
+        verify(orderPersistencePort, never()).updateOrder(any(Order.class));
+        verify(messagePersistencePort, never()).sendOrderReadyMessage(anyString(), anyString());
+    }
+
+    @Test
+    public void test_delivered_order_success() {
+        Order order = new Order(1L, "client1", "nit123", LocalDateTime.now(), DomainConstants.ORDER_STATUS_READY, "chef1", "123456", new ArrayList<>());
+
+        when(orderPersistencePort.getOrderById(1L)).thenReturn(Optional.of(order));
+        when(orderPersistencePort.updateOrder(any(Order.class))).thenReturn(order);
+
+        // Act
+        Order result = orderUseCase.deliveredOrder(1L, "123456", "nit123");
+
+        // Assert
+        assertEquals(DomainConstants.ORDER_STATUS_DELIVERED, result.getEstado());
+        verify(orderPersistencePort).updateOrder(order);
+    }
+
+    @Test
+    public void test_delivered_order_not_found() {
+        when(orderPersistencePort.getOrderById(1L)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(OrderNotFoundException.class, () -> {
+            orderUseCase.deliveredOrder(1L, "123456", "nit123");
+        });
+    }
+
+    @Test
+    public void test_delivered_order_nit_mismatch() {
+        Order order = new Order(1L, "client1", "nit123", LocalDateTime.now(), DomainConstants.ORDER_STATUS_READY, "chef1", "123456", new ArrayList<>());
+
+        when(orderPersistencePort.getOrderById(1L)).thenReturn(Optional.of(order));
+
+        // Act & Assert
+        assertThrows(OrderAssignmentNotAllowedException.class, () -> {
+            orderUseCase.deliveredOrder(1L, "123456", "wrongNit");
+        });
+    }
+
+    @Test
+    public void test_delivered_order_status_not_ready() {
+        Order order = new Order(1L, "client1", "nit123", LocalDateTime.now(), DomainConstants.ORDER_STATUS_PENDING, "chef1", "123456", new ArrayList<>());
+
+        when(orderPersistencePort.getOrderById(1L)).thenReturn(Optional.of(order));
+
+        // Act & Assert
+        assertThrows(InvalidOrderStatusException.class, () -> {
+            orderUseCase.deliveredOrder(1L, "123456", "nit123");
+        });
+    }
+
+    @Test
+    public void test_delivered_order_pin_mismatch() {
+        Order order = new Order(1L, "client1", "nit123", LocalDateTime.now(), DomainConstants.ORDER_STATUS_READY, "chef1", "123456", new ArrayList<>());
+
+        when(orderPersistencePort.getOrderById(1L)).thenReturn(Optional.of(order));
+
+        // Act & Assert
+        assertThrows(InvalidPinException.class, () -> {
+            orderUseCase.deliveredOrder(1L, "654321", "nit123");
+        });
     }
 }

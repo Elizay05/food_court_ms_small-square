@@ -16,6 +16,16 @@ import java.util.Map;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ExceptionResponse> handleGlobalException(Exception ex) {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(
+                "Error interno en el servidor: " + ex.getMessage(),
+                HttpStatus.INTERNAL_SERVER_ERROR.toString(),
+                LocalDateTime.now()
+        );
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(exceptionResponse);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
@@ -67,16 +77,22 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse);
     }
 
-    @ExceptionHandler(OrderAlreadyAssignedException.class)
-    public ResponseEntity<ExceptionResponse> handleOrderAlreadyAssignedException(OrderAlreadyAssignedException ex) {
-        ExceptionResponse exceptionResponse = new ExceptionResponse(ex.getMessage(), HttpStatus.CONFLICT.toString(), LocalDateTime.now());
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(exceptionResponse);
-    }
-
     @ExceptionHandler(OrderAssignmentNotAllowedException.class)
     public ResponseEntity<ExceptionResponse> handleOrderAssignmentNotAllowedException(OrderAssignmentNotAllowedException ex) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(ex.getMessage(), HttpStatus.FORBIDDEN.toString(), LocalDateTime.now());
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(exceptionResponse);
+    }
+
+    @ExceptionHandler(InvalidOrderStatusException.class)
+    public ResponseEntity<ExceptionResponse> handleInvalidOrderStatusException(InvalidOrderStatusException ex) {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(ex.getMessage(), HttpStatus.CONFLICT.toString(), LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(exceptionResponse);
+    }
+
+    @ExceptionHandler(InvalidPinException.class)
+    public ResponseEntity<ExceptionResponse> handleInvalidPinException(InvalidPinException ex) {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(ex.getMessage(), HttpStatus.CONFLICT.toString(), LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(exceptionResponse);
     }
 
     @ExceptionHandler(OrderAlreadyReadyException.class)

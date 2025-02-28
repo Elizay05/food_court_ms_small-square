@@ -8,4 +8,5 @@ public interface IOrderServicePort {
     Page<Order> listOrdersByFilters(String estado, PageRequestDto pageRequestDto, String nit);
     Order assignOrder(Long orderId, String documentNumber, String nitRestaurant);
     Order readyOrder(Long orderId, String nitRestaurant);
+    Order deliveredOrder(Long orderId, String pin, String nitRestaurant);
 }

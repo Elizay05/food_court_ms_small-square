@@ -9,4 +9,5 @@ public interface IOrderHandler {
     PageResponseDto<OrderResponseDto> listOrdersByFilters(String estado, int page, int size);
     OrderResponseDto assignOrder(Long orderId);
     OrderResponseDto readyOrder(Long orderId);
+    OrderResponseDto deliveredOrder(Long orderId, String pin);
 }

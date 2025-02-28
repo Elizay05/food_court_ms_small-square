@@ -51,7 +51,7 @@ public class OrderJpaAdapterTest {
     @Test
     public void test_save_order_with_multiple_dishes_success() {
         // Arrange
-        Order order = new Order(1L, "client1", "rest1", LocalDateTime.now(), "PENDING", null, "123456",
+        Order order = new Order(1L, "client1", "rest1", LocalDateTime.now(), "PENDING", null,
                 Arrays.asList(new OrderDish(1L, 2), new OrderDish(2L, 1)));
 
         OrderEntity orderEntity = new OrderEntity(1L, "client1", "rest1", LocalDateTime.now(), "PENDING", "025663", null);
@@ -213,7 +213,7 @@ public class OrderJpaAdapterTest {
         OrderDishEntity orderDishEntity = new OrderDishEntity();
         List<OrderDishEntity> orderDishEntities = Collections.singletonList(orderDishEntity);
 
-        Order order = new Order(1L, "client1", nit, LocalDateTime.now(), estado, "chef1","123456", new ArrayList<>());
+        Order order = new Order(1L, "client1", nit, LocalDateTime.now(), estado, "chef1", new ArrayList<>());
         OrderDish orderDish = new OrderDish(1L, 2);
         List<OrderDish> orderDishes = Collections.singletonList(orderDish);
 
@@ -248,7 +248,7 @@ public class OrderJpaAdapterTest {
         OrderDishEntity orderDishEntity = new OrderDishEntity();
         List<OrderDishEntity> orderDishEntities = Collections.singletonList(orderDishEntity);
 
-        Order order = new Order(1L, "client1", nit, LocalDateTime.now(), null, "chef1", "123456", new ArrayList<>());
+        Order order = new Order(1L, "client1", nit, LocalDateTime.now(), null, "chef1", new ArrayList<>());
         OrderDish orderDish = new OrderDish(1L, 2);
         List<OrderDish> orderDishes = Collections.singletonList(orderDish);
 
@@ -284,7 +284,7 @@ public class OrderJpaAdapterTest {
         OrderDishEntity orderDishEntity = new OrderDishEntity();
         List<OrderDishEntity> orderDishEntities = Collections.singletonList(orderDishEntity);
 
-        Order order = new Order(1L, "client1", nit, LocalDateTime.now(), estado, "chef1", "123456", new ArrayList<>());
+        Order order = new Order(1L, "client1", nit, LocalDateTime.now(), estado, "chef1", new ArrayList<>());
         OrderDish orderDish = new OrderDish(1L, 2);
         List<OrderDish> orderDishes = Collections.singletonList(orderDish);
 
@@ -321,8 +321,8 @@ public class OrderJpaAdapterTest {
         OrderDishEntity orderDishEntity = new OrderDishEntity();
         List<OrderDishEntity> orderDishEntities = Collections.singletonList(orderDishEntity);
 
-        Order order1 = new Order(1L, "client1", nit, LocalDateTime.now().minusDays(1), estado, "chef1","123456", new ArrayList<>());
-        Order order2 = new Order(2L, "client2", nit, LocalDateTime.now(), estado, "chef2", "123456", new ArrayList<>());
+        Order order1 = new Order(1L, "client1", nit, LocalDateTime.now().minusDays(1), estado, "chef1", new ArrayList<>());
+        Order order2 = new Order(2L, "client2", nit, LocalDateTime.now(), estado, "chef2", new ArrayList<>());
         OrderDish orderDish = new OrderDish(1L, 2);
         List<OrderDish> orderDishes = Collections.singletonList(orderDish);
 
@@ -374,7 +374,7 @@ public class OrderJpaAdapterTest {
         // Arrange
         Long orderId = 1L;
         OrderEntity orderEntity = new OrderEntity();
-        Order expectedOrder = new Order(1L, "client1", "nit1", LocalDateTime.now(), "PENDING", "chef1", "123456", new ArrayList<>());
+        Order expectedOrder = new Order(1L, "client1", "nit1", LocalDateTime.now(), "PENDING", "chef1", new ArrayList<>());
 
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(orderEntity));
         when(orderEntityMapper.toDomain(orderEntity)).thenReturn(expectedOrder);
@@ -407,11 +407,11 @@ public class OrderJpaAdapterTest {
     @Test
     public void test_update_order_success() {
         // Arrange
-        Order order = new Order(1L, "client1", "nit123", LocalDateTime.now(), "PENDING", "chef1","123456", new ArrayList<>());
+        Order order = new Order(1L, "client1", "nit123", LocalDateTime.now(), "PENDING", "chef1", new ArrayList<>());
         OrderEntity orderEntity = new OrderEntity(1L, "client1", "nit123", LocalDateTime.now(), "PENDING", "025663", "chef1");
         OrderEntity savedOrderEntity = new OrderEntity(1L, "client1", "nit123", LocalDateTime.now(), "PENDING", "025663", "chef1");
         List<OrderDishEntity> orderDishEntities = new ArrayList<>();
-        Order mappedOrder = new Order(1L, "client1", "nit123", LocalDateTime.now(), "PENDING", "chef1","123456", new ArrayList<>());
+        Order mappedOrder = new Order(1L, "client1", "nit123", LocalDateTime.now(), "PENDING", "chef1", new ArrayList<>());
 
         when(orderEntityMapper.toEntity(order)).thenReturn(orderEntity);
         when(orderRepository.save(orderEntity)).thenReturn(savedOrderEntity);

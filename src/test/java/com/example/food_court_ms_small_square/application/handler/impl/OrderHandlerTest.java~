@@ -45,8 +45,8 @@ public class OrderHandlerTest {
         orderRequestDto.setNitRestaurante("123456789");
         orderRequestDto.setPlatos(new ArrayList<>());
 
-        Order order = new Order(1L, "DOC123", "123456789", LocalDateTime.now(), "PENDING", null, "123456", new ArrayList<>());
-        Order savedOrder = new Order(1L, "DOC123", "123456789", LocalDateTime.now(), "PENDING", null, "123456", new ArrayList<>());
+        Order order = new Order(1L, "DOC123", "123456789", LocalDateTime.now(), "PENDING", null, new ArrayList<>());
+        Order savedOrder = new Order(1L, "DOC123", "123456789", LocalDateTime.now(), "PENDING", null, new ArrayList<>());
 
         CustomUserDetails userDetails = new CustomUserDetails("user1", "DOC123", null, new ArrayList<>());
         Authentication auth = mock(Authentication.class);
@@ -82,8 +82,8 @@ public class OrderHandlerTest {
         SecurityContextHolder.getContext().setAuthentication(auth);
         when(auth.getPrincipal()).thenReturn(userDetails);
 
-        Order order1 = new Order(1L, "111", "nit1", LocalDateTime.now(), "PENDING", null, "123456", new ArrayList<>());
-        Order order2 = new Order(2L, "222", "nit1", LocalDateTime.now(), "PENDING", null, "123456", new ArrayList<>());
+        Order order1 = new Order(1L, "111", "nit1", LocalDateTime.now(), "PENDING", null, new ArrayList<>());
+        Order order2 = new Order(2L, "222", "nit1", LocalDateTime.now(), "PENDING", null, new ArrayList<>());
         List<Order> orders = Arrays.asList(order1, order2);
         Page<Order> orderPage = new Page<>(orders, 1, 2);
 
@@ -145,7 +145,7 @@ public class OrderHandlerTest {
         when(authentication.getPrincipal()).thenReturn(userDetails);
         SecurityContextHolder.setContext(securityContext);
 
-        Order mockOrder = new Order(orderId, "client1", nit, LocalDateTime.now(), "ASSIGNED", documentNumber,"123456", Collections.emptyList());
+        Order mockOrder = new Order(orderId, "client1", nit, LocalDateTime.now(), "ASSIGNED", documentNumber, Collections.emptyList());
         OrderResponseDto expectedResponse = new OrderResponseDto(orderId, "client1", nit, LocalDateTime.now(), "ASSIGNED", documentNumber, "025663", Collections.emptyList());
 
         when(orderServicePort.assignOrder(orderId, documentNumber, nit)).thenReturn(mockOrder);
@@ -207,7 +207,7 @@ public class OrderHandlerTest {
         when(authentication.getPrincipal()).thenReturn(userDetails);
         SecurityContextHolder.setContext(securityContext);
 
-        Order order = new Order(orderId, "client1", nit, LocalDateTime.now(), "READY", "chef1","123456", Collections.emptyList());
+        Order order = new Order(orderId, "client1", nit, LocalDateTime.now(), "READY", "chef1", Collections.emptyList());
         OrderResponseDto expectedResponse = new OrderResponseDto(orderId, "client1", nit, LocalDateTime.now(), "READY", "chef1", "025663", Collections.emptyList());
 
         when(orderServicePort.readyOrder(orderId, nit)).thenReturn(order);

@@ -2,6 +2,7 @@ package com.example.food_court_ms_small_square.infrastructure.input.rest;
 
 import com.example.food_court_ms_small_square.application.dto.request.OrderDishRequestDto;
 import com.example.food_court_ms_small_square.application.dto.request.OrderRequestDto;
+import com.example.food_court_ms_small_square.application.dto.request.PinRequestDto;
 import com.example.food_court_ms_small_square.application.dto.response.OrderResponseDto;
 import com.example.food_court_ms_small_square.application.dto.response.PageResponseDto;
 import com.example.food_court_ms_small_square.application.handler.impl.OrderHandler;
@@ -141,5 +142,28 @@ public class OrderRestControllerTest {
             orderRestController.readyOrder(nonExistentOrderId);
         });
         verify(orderHandler).readyOrder(nonExistentOrderId);
+    }
+
+    @Test
+    public void test_deliver_order_success() {
+        // Arrange
+        Long orderId = 1L;
+        String pin = "1234";
+        PinRequestDto pinRequestDto = new PinRequestDto(pin);
+
+        OrderResponseDto expectedResponse = new OrderResponseDto();
+        expectedResponse.setId(orderId);
+        expectedResponse.setEstado("DELIVERED");
+        expectedResponse.setPin(pin);
+
+        when(orderHandler.deliveredOrder(orderId, pin)).thenReturn(expectedResponse);
+
+        // Act
+        ResponseEntity<OrderResponseDto> response = orderRestController.deliveredOrder(orderId, pinRequestDto);
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(expectedResponse, response.getBody());
+        verify(orderHandler).deliveredOrder(orderId, pin);
     }
 }
