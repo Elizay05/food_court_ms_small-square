@@ -15,6 +15,7 @@ public class DomainConstants {
     public static final String ORDER_STATUS_PENDING = "PENDIENTE";
     public static final String ORDER_STATUS_IN_PROGRESS = "EN PREPARACIÓN";
     public static final String ORDER_STATUS_READY = "LISTO";
+    public static final String ORDER_STATUS_DELIVERED = "ENTREGADO";
 
     public static final String MESSAGE_READY_ORDER = "¡Tu pedido está listo! Usa el PIN de seguridad %s para recogerlo.";
 }

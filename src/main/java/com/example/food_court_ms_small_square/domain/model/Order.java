@@ -10,15 +10,17 @@ public class Order {
     private LocalDateTime fecha;
     private String estado;
     private String idChef;
+    private String pin;
     private List<OrderDish> platos;
 
-    public Order(Long id, String idCliente, String nitRestaurante, LocalDateTime fecha, String estado, String idChef, List<OrderDish> platos) {
+    public Order(Long id, String idCliente, String nitRestaurante, LocalDateTime fecha, String estado, String idChef, String pin, List<OrderDish> platos) {
         this.id = id;
         this.idCliente = idCliente;
         this.nitRestaurante = nitRestaurante;
         this.fecha = fecha;
         this.estado = estado;
         this.idChef = idChef;
+        this.pin = pin;
         this.platos = platos;
     }
 
@@ -68,6 +70,14 @@ public class Order {
 
     public void setIdChef(String idChef) {
         this.idChef = idChef;
+    }
+
+    public String getPin() {
+        return pin;
+    }
+
+    public void setPin(String pin) {
+        this.pin = pin;
     }
 
     public List<OrderDish> getPlatos() {

@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -27,6 +28,20 @@ public class GlobalExceptionHandlerTest {
     @BeforeEach
     void setUp() {
         globalExceptionHandler = new GlobalExceptionHandler();
+    }
+
+    @Test
+    public void test_generic_exception_returns_500() {
+        GlobalExceptionHandler handler = new GlobalExceptionHandler();
+
+        Exception testException = new RuntimeException("Test error");
+
+        ResponseEntity<ExceptionResponse> response = handler.handleGlobalException(testException);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertEquals("Error interno en el servidor: Test error", response.getBody().getMessage());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.toString(), response.getBody().getStatus());
+        assertNotNull(response.getBody().getTimestamp());
     }
 
     @Test
@@ -122,17 +137,6 @@ public class GlobalExceptionHandlerTest {
     }
 
     @Test
-    void shouldHandleOrderAlreadyAssignedException() {
-        OrderAlreadyAssignedException exception = new OrderAlreadyAssignedException("La orden ya esta asignada a un chef.");
-
-        ResponseEntity<ExceptionResponse> response = globalExceptionHandler.handleOrderAlreadyAssignedException(exception);
-
-        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
-        assertEquals("La orden ya esta asignada a un chef.", response.getBody().getMessage());
-        assertEquals(HttpStatus.CONFLICT.toString(), response.getBody().getStatus());
-    }
-
-    @Test
     void shouldHandleOrderAssignmentNotAllowedException() {
         OrderAssignmentNotAllowedException exception = new OrderAssignmentNotAllowedException("No tienes permisos para asignar esta orden.");
 
@@ -144,13 +148,35 @@ public class GlobalExceptionHandlerTest {
     }
 
     @Test
+    void shouldHandleInvalidOrderStatusException() {
+        InvalidOrderStatusException exception = new InvalidOrderStatusException("La orden ya esta lista.");
+
+        ResponseEntity<ExceptionResponse> response = globalExceptionHandler.handleInvalidOrderStatusException(exception);
+
+        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+        assertEquals("La orden ya esta lista.", response.getBody().getMessage());
+        assertEquals(HttpStatus.CONFLICT.toString(), response.getBody().getStatus());
+    }
+
+    @Test
+    void shouldHandleInvalidPinException() {
+        InvalidPinException exception = new InvalidPinException("El pin proporcionado no coincide con la orden.");
+
+        ResponseEntity<ExceptionResponse> response = globalExceptionHandler.handleInvalidPinException(exception);
+
+        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+        assertEquals("El pin proporcionado no coincide con la orden.", response.getBody().getMessage());
+        assertEquals(HttpStatus.CONFLICT.toString(), response.getBody().getStatus());
+    }
+
+    @Test
     void shouldHandleOrderAlreadyReadyException() {
-        OrderAlreadyReadyException exception = new OrderAlreadyReadyException("La orden ya esta lista.");
+        OrderAlreadyReadyException exception = new OrderAlreadyReadyException("La orden ya está lista.");
 
         ResponseEntity<ExceptionResponse> response = globalExceptionHandler.handleOrderAlreadyReadyException(exception);
 
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
-        assertEquals("La orden ya esta lista.", response.getBody().getMessage());
+        assertEquals("La orden ya está lista.", response.getBody().getMessage());
         assertEquals(HttpStatus.CONFLICT.toString(), response.getBody().getStatus());
     }
 }

@@ -17,5 +17,6 @@ public class OrderResponseDto {
     private LocalDateTime fecha;
     private String estado;
     private String idChef;
+    private String pin;
     private List<OrderDishResponseDto> platos;
 }

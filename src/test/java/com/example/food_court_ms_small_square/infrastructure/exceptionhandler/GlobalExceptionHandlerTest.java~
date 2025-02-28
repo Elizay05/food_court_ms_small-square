@@ -122,17 +122,6 @@ public class GlobalExceptionHandlerTest {
     }
 
     @Test
-    void shouldHandleOrderAlreadyAssignedException() {
-        OrderAlreadyAssignedException exception = new OrderAlreadyAssignedException("La orden ya esta asignada a un chef.");
-
-        ResponseEntity<ExceptionResponse> response = globalExceptionHandler.handleOrderAlreadyAssignedException(exception);
-
-        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
-        assertEquals("La orden ya esta asignada a un chef.", response.getBody().getMessage());
-        assertEquals(HttpStatus.CONFLICT.toString(), response.getBody().getStatus());
-    }
-
-    @Test
     void shouldHandleOrderAssignmentNotAllowedException() {
         OrderAssignmentNotAllowedException exception = new OrderAssignmentNotAllowedException("No tienes permisos para asignar esta orden.");
 
@@ -141,5 +130,38 @@ public class GlobalExceptionHandlerTest {
         assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
         assertEquals("No tienes permisos para asignar esta orden.", response.getBody().getMessage());
         assertEquals(HttpStatus.FORBIDDEN.toString(), response.getBody().getStatus());
+    }
+
+    @Test
+    void shouldHandleInvalidOrderStatusException() {
+        InvalidOrderStatusException exception = new InvalidOrderStatusException("La orden ya esta lista.");
+
+        ResponseEntity<ExceptionResponse> response = globalExceptionHandler.handleInvalidOrderStatusException(exception);
+
+        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+        assertEquals("La orden ya esta lista.", response.getBody().getMessage());
+        assertEquals(HttpStatus.CONFLICT.toString(), response.getBody().getStatus());
+    }
+
+    @Test
+    void shouldHandleInvalidPinException() {
+        InvalidPinException exception = new InvalidPinException("El pin proporcionado no coincide con la orden.");
+
+        ResponseEntity<ExceptionResponse> response = globalExceptionHandler.handleInvalidPinException(exception);
+
+        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+        assertEquals("El pin proporcionado no coincide con la orden.", response.getBody().getMessage());
+        assertEquals(HttpStatus.CONFLICT.toString(), response.getBody().getStatus());
+    }
+
+    @Test
+    void shouldHandleOrderAlreadyReadyException() {
+        OrderAlreadyReadyException exception = new OrderAlreadyReadyException("La orden ya está lista.");
+
+        ResponseEntity<ExceptionResponse> response = globalExceptionHandler.handleOrderAlreadyReadyException(exception);
+
+        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+        assertEquals("La orden ya está lista.", response.getBody().getMessage());
+        assertEquals(HttpStatus.CONFLICT.toString(), response.getBody().getStatus());
     }
 }

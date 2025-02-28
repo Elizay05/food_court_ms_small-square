@@ -1,6 +1,7 @@
 package com.example.food_court_ms_small_square.infrastructure.input.rest;
 
 import com.example.food_court_ms_small_square.application.dto.request.OrderRequestDto;
+import com.example.food_court_ms_small_square.application.dto.request.PinRequestDto;
 import com.example.food_court_ms_small_square.application.dto.response.OrderResponseDto;
 import com.example.food_court_ms_small_square.application.dto.response.PageResponseDto;
 import com.example.food_court_ms_small_square.application.handler.IOrderHandler;
@@ -91,10 +92,30 @@ public class OrderRestController {
         OrderResponseDto orderResponseDto = orderHandler.assignOrder(orderId);
         return ResponseEntity.ok().body(orderResponseDto);
     }
+
+    @Operation(
+            summary = "Mark an order as ready",
+            description = "Allows an authenticated employee to update an order's status to 'ready'."
+    )
+    @ApiResponse(responseCode = "200", description = "Order successfully marked as ready",
+            content = @Content(mediaType = "application/json"))
+    @ApiResponse(responseCode = "403", description = "Forbidden - User lacks necessary permissions",
+            content = @Content(mediaType = "application/json"))
+    @ApiResponse(responseCode = "404", description = "Order not found",
+            content = @Content(mediaType = "application/json"))
+    @ApiResponse(responseCode = "500", description = "Internal server error",
+            content = @Content(mediaType = "application/json"))
     @PatchMapping("/{orderId}/ready")
     @PreAuthorize("hasRole('ROLE_Employee')")
     public ResponseEntity<OrderResponseDto> readyOrder(@PathVariable Long orderId) {
         OrderResponseDto orderResponseDto = orderHandler.readyOrder(orderId);
+        return ResponseEntity.ok().body(orderResponseDto);
+    }
+
+    @PatchMapping("/{orderId}/delivered")
+    @PreAuthorize("hasRole('ROLE_Employee')")
+    public ResponseEntity<OrderResponseDto> deliveredOrder(@PathVariable Long orderId, @RequestBody PinRequestDto pinRequestDto) {
+        OrderResponseDto orderResponseDto = orderHandler.deliveredOrder(orderId, pinRequestDto.getPin());
         return ResponseEntity.ok().body(orderResponseDto);
     }
 }
