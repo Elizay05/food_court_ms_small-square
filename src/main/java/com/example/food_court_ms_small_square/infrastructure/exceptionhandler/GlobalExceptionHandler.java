@@ -16,16 +16,6 @@ import java.util.Map;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ExceptionResponse> handleGlobalException(Exception ex) {
-        ExceptionResponse exceptionResponse = new ExceptionResponse(
-                "Error interno en el servidor: " + ex.getMessage(),
-                HttpStatus.INTERNAL_SERVER_ERROR.toString(),
-                LocalDateTime.now()
-        );
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(exceptionResponse);
-    }
-
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();

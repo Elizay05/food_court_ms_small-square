@@ -9,4 +9,5 @@ import java.util.List;
 
 public interface IOrderDishRepository extends JpaRepository<OrderDishEntity, OrderDishPk> {
     List<OrderDishEntity> findByOrden(OrderEntity order);
+    void deleteByOrden(OrderEntity order);
 }

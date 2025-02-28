@@ -10,4 +10,5 @@ public interface IOrderHandler {
     OrderResponseDto assignOrder(Long orderId);
     OrderResponseDto readyOrder(Long orderId);
     OrderResponseDto deliveredOrder(Long orderId, String pin);
+    void cancelOrder(Long orderId);
 }

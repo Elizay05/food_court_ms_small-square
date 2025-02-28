@@ -80,6 +80,6 @@ public class OrderHandler implements IOrderHandler {
     public void cancelOrder(Long orderId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-        orderServicePort.cancelOrder(orderId, userDetails.getDocumentNumber());
+        orderServicePort.deliveredOrder(orderId, userDetails.getDocumentNumber());
     }
 }
