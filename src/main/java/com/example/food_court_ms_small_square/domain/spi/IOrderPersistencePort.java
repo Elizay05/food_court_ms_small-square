@@ -14,4 +14,5 @@ public interface IOrderPersistencePort {
     Page<Order> listOrdersByFilters(String nit, String estado, PageRequestDto pageRequestDto);
     Optional<Order> getOrderById(Long orderId);
     Order updateOrder(Order order);
+    void deleteOrder(Long orderId);
 }

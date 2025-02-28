@@ -1,6 +1,7 @@
 package com.example.food_court_ms_small_square.infrastructure.output.jpa.adapter;
 
 import com.example.food_court_ms_small_square.application.dto.request.PageRequestDto;
+import com.example.food_court_ms_small_square.domain.exception.OrderNotFoundException;
 import com.example.food_court_ms_small_square.domain.model.Order;
 import com.example.food_court_ms_small_square.domain.model.Page;
 import com.example.food_court_ms_small_square.domain.spi.IOrderPersistencePort;
@@ -99,5 +100,14 @@ public class OrderJpaAdapter implements IOrderPersistencePort {
         mappedOrder.setPlatos(orderDishEntityMapper.toDomainList(orderDishEntities));
 
         return mappedOrder;
+    }
+
+    @Override
+    public void deleteOrder(Long orderId) {
+        OrderEntity orderEntity = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderNotFoundException("Orden no encontrada."));
+
+        orderDishRepository.deleteByOrden(orderEntity);
+        orderRepository.delete(orderEntity);
     }
 }

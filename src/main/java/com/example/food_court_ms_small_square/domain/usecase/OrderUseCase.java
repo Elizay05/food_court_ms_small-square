@@ -118,6 +118,22 @@ public class OrderUseCase implements IOrderServicePort {
         return orderPersistencePort.updateOrder(order);
     }
 
+    @Override
+    public void cancelOrder(Long orderId, String documentNumber) {
+        Order order = orderPersistencePort.getOrderById(orderId)
+                .orElseThrow(() -> new OrderNotFoundException("Orden no encontrada."));
+
+        if (!Objects.equals(order.getIdCliente(), documentNumber)) {
+            throw new OrderAssignmentNotAllowedException("No tienes permisos para cancelar esta orden.");
+        }
+
+        if (!order.getEstado().equals(DomainConstants.ORDER_STATUS_PENDING)) {
+            throw new InvalidOrderStatusException("Lo sentimos, tu pedido ya está en preparación y no puede cancelarse");
+        }
+
+        orderPersistencePort.deleteOrder(order.getId());
+    }
+
     private void validateDishesBelongToRestaurant(List<OrderDish> dishes, String nitRestaurante) {
         List<Long> dishIds = dishes.stream()
                 .map(OrderDish::getIdPlato)

@@ -119,10 +119,10 @@ public class OrderRestController {
         return ResponseEntity.ok().body(orderResponseDto);
     }
 
-    @DeleteMapping("/{orderId}")
+    @DeleteMapping("/{orderId}/cancel")
     @PreAuthorize("hasRole('ROLE_Customer')")
-    public ResponseEntity<Void> cancelOrder(@PathVariable Long orderId) {
+    public ResponseEntity<String> cancelOrder(@PathVariable Long orderId) {
         orderHandler.cancelOrder(orderId);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok().body("Orden cancelada con éxito");
     }
 }

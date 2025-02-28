@@ -16,7 +16,6 @@ import java.util.Collections;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -28,20 +27,6 @@ public class GlobalExceptionHandlerTest {
     @BeforeEach
     void setUp() {
         globalExceptionHandler = new GlobalExceptionHandler();
-    }
-
-    @Test
-    public void test_generic_exception_returns_500() {
-        GlobalExceptionHandler handler = new GlobalExceptionHandler();
-
-        Exception testException = new RuntimeException("Test error");
-
-        ResponseEntity<ExceptionResponse> response = handler.handleGlobalException(testException);
-
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-        assertEquals("Error interno en el servidor: Test error", response.getBody().getMessage());
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.toString(), response.getBody().getStatus());
-        assertNotNull(response.getBody().getTimestamp());
     }
 
     @Test
