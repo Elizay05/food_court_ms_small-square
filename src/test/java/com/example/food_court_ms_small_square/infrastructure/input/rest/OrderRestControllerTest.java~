@@ -170,6 +170,7 @@ public class OrderRestControllerTest {
     public void test_cancel_order_success() {
         // Arrange
         Long orderId = 1L;
+        OrderRestController orderRestController = new OrderRestController(orderHandler);
 
         doNothing().when(orderHandler).cancelOrder(orderId);
 

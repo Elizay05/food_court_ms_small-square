@@ -1,6 +1,7 @@
 package com.example.food_court_ms_small_square.infrastructure.output.jpa.adapter;
 
 import com.example.food_court_ms_small_square.application.dto.request.PageRequestDto;
+import com.example.food_court_ms_small_square.domain.exception.OrderNotFoundException;
 import com.example.food_court_ms_small_square.domain.model.Order;
 import com.example.food_court_ms_small_square.domain.model.OrderDish;
 import com.example.food_court_ms_small_square.domain.model.Page;
@@ -431,5 +432,40 @@ public class OrderJpaAdapterTest {
         verify(orderEntityMapper).toEntity(order);
         verify(orderRepository).save(orderEntity);
         verify(orderDishRepository).findByOrden(savedOrderEntity);
+    }
+
+    @Test
+    public void test_delete_existing_order_and_dishes_success() {
+        Long orderId = 1L;
+        OrderEntity orderEntity = new OrderEntity();
+        orderEntity.setId(orderId);
+
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(orderEntity));
+        doNothing().when(orderDishRepository).deleteByOrden(orderEntity);
+        doNothing().when(orderRepository).delete(orderEntity);
+
+        // Act
+        orderJpaAdapter.deleteOrder(orderId);
+
+        // Assert
+        verify(orderRepository).findById(orderId);
+        verify(orderDishRepository).deleteByOrden(orderEntity);
+        verify(orderRepository).delete(orderEntity);
+    }
+
+    @Test
+    public void test_delete_nonexistent_order_throws_exception() {
+        // Arrange
+        Long orderId = 1L;
+        when(orderRepository.findById(orderId)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(OrderNotFoundException.class, () -> {
+            orderJpaAdapter.deleteOrder(orderId);
+        });
+
+        verify(orderRepository).findById(orderId);
+        verify(orderDishRepository, never()).deleteByOrden(any());
+        verify(orderRepository, never()).delete(any());
     }
 }
