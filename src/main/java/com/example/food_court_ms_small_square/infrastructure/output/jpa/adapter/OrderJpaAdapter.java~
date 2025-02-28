@@ -5,7 +5,6 @@ import com.example.food_court_ms_small_square.domain.exception.OrderNotFoundExce
 import com.example.food_court_ms_small_square.domain.model.Order;
 import com.example.food_court_ms_small_square.domain.model.Page;
 import com.example.food_court_ms_small_square.domain.spi.IOrderPersistencePort;
-import com.example.food_court_ms_small_square.domain.spi.ITraceabilityPersistencePort;
 import com.example.food_court_ms_small_square.domain.util.DomainConstants;
 import com.example.food_court_ms_small_square.infrastructure.output.jpa.entity.OrderDishEntity;
 import com.example.food_court_ms_small_square.infrastructure.output.jpa.entity.OrderEntity;
@@ -29,7 +28,6 @@ public class OrderJpaAdapter implements IOrderPersistencePort {
     private final IOrderDishEntityMapper orderDishEntityMapper;
     private final IOrderDishRepository orderDishRepository;
     private final IDishRespository dishRespository;
-    private final ITraceabilityPersistencePort traceabilityPersistencePort;
 
     @Override
     public Order saveOrder(Order order) {
@@ -45,7 +43,6 @@ public class OrderJpaAdapter implements IOrderPersistencePort {
         Order mappedOrder = orderEntityMapper.toDomain(orderEntity);
         mappedOrder.setPlatos(orderDishEntityMapper.toDomainList(savedPlatos));
 
-        traceabilityPersistencePort.saveTraceability(mappedOrder.getId(), mappedOrder.getIdCliente(), mappedOrder.getEstado());
         return mappedOrder;
     }
 
@@ -102,7 +99,6 @@ public class OrderJpaAdapter implements IOrderPersistencePort {
         Order mappedOrder = orderEntityMapper.toDomain(savedOrderEntity);
         mappedOrder.setPlatos(orderDishEntityMapper.toDomainList(orderDishEntities));
 
-        traceabilityPersistencePort.saveTraceability(mappedOrder.getId(), mappedOrder.getIdCliente(), mappedOrder.getEstado());
         return mappedOrder;
     }
 

@@ -19,6 +19,7 @@ import com.example.food_court_ms_small_square.infrastructure.output.jpa.reposito
 import com.example.food_court_ms_small_square.infrastructure.output.jpa.repository.IOrderRepository;
 import com.example.food_court_ms_small_square.infrastructure.output.jpa.repository.IRestaurantRepository;
 import com.example.food_court_ms_small_square.infrastructure.output.rest.MessageRestAdapter;
+import com.example.food_court_ms_small_square.infrastructure.output.rest.TraceabilityRestAdapter;
 import com.example.food_court_ms_small_square.infrastructure.output.rest.UserRestAdapter;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -55,6 +56,11 @@ public class BeanConfiguration {
     }
 
     @Bean
+    public ITraceabilityPersistencePort traceabilityPersistencePort(RestTemplate restTemplate, HttpServletRequest httpServletRequest) {
+        return new TraceabilityRestAdapter(restTemplate, httpServletRequest);
+    }
+
+    @Bean
     public IRestaurantServicePort restaurantServicePort(IUserValidationPersistencePort userValidationPersistencePort) {
         return new RestaurantUseCase(restaurantPersistencePort(), userValidationPersistencePort);
     }
@@ -76,7 +82,7 @@ public class BeanConfiguration {
 
     @Bean
     public IOrderPersistencePort orderPersistencePort() {
-        return new OrderJpaAdapter(orderRepository, orderEntityMapper, orderDishEntityMapper, orderDishRepository, dishRepository);
+        return new OrderJpaAdapter(orderRepository, orderEntityMapper, orderDishEntityMapper, orderDishRepository, dishRepository, traceabilityPersistencePort(restTemplate(), null));
     }
 
     @Bean
