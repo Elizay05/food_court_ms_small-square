@@ -19,7 +19,7 @@ public class TraceabilityRestAdapter implements ITraceabilityPersistencePort {
     private final HttpServletRequest request;
 
     @Override
-    public void saveTraceability(Long idPedido, String idCliente, String estado) {
+    public void saveTraceability(Long idPedido, String idCliente, String nitRestaurante, String idChef, String estado) {
         String url = DomainConstants.URL_SAVE_TRACEABILITY;
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -28,6 +28,8 @@ public class TraceabilityRestAdapter implements ITraceabilityPersistencePort {
         Map<String, String> requestBody = new HashMap<>();
         requestBody.put("pedidoId", idPedido.toString());
         requestBody.put("clienteId", idCliente);
+        requestBody.put("restauranteId", nitRestaurante);
+        requestBody.put("chefId", idChef);
         requestBody.put("estado", estado);
 
         HttpEntity<Map<String, String>> entity = new HttpEntity<>(requestBody, headers);
