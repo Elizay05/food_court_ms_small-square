@@ -33,6 +33,8 @@ public class TraceabilityRestAdapterTest {
     public void test_save_traceability_success() {
         Long idPedido = 123L;
         String idCliente = "456";
+        String nitRestaurante = "1234";
+        String idChef = "123";
         String estado = "PENDIENTE";
         String authToken = "Bearer token123";
 
@@ -45,12 +47,14 @@ public class TraceabilityRestAdapterTest {
         Map<String, String> expectedBody = new HashMap<>();
         expectedBody.put("pedidoId", "123");
         expectedBody.put("clienteId", "456");
+        expectedBody.put("restauranteId", "1234");
+        expectedBody.put("")
         expectedBody.put("estado", "PENDIENTE");
 
         HttpEntity<Map<String, String>> expectedEntity = new HttpEntity<>(expectedBody, expectedHeaders);
 
         // Act
-        adapter.saveTraceability(idPedido, idCliente, estado);
+        adapter.saveTraceability(idPedido, idCliente, nitRestaurante,estado);
 
         // Assert
         verify(restTemplate).postForEntity(
@@ -61,21 +65,34 @@ public class TraceabilityRestAdapterTest {
     }
 
     @Test
-    public void test_save_traceability_with_null_values() {
-        Long idPedido = null;
-        String idCliente = null;
-        String estado = null;
+    public void test_save_traceability_service_timeout() {
+        // Arrange
+        Long idPedido = 123L;
+        String idCliente = "456";
+        String nitRestaurante = "1234";
+        String estado = "PENDIENTE";
+        String authToken = "Bearer token123";
 
-        when(request.getHeader("Authorization")).thenReturn("Bearer token123");
-        when(restTemplate.postForEntity(
-                eq(DomainConstants.URL_SAVE_TRACEABILITY),
-                any(HttpEntity.class),
-                eq(Void.class)
-        )).thenThrow(new RuntimeException("Invalid parameters"));
+        when(request.getHeader("Authorization")).thenReturn(authToken);
+
+        HttpHeaders expectedHeaders = new HttpHeaders();
+        expectedHeaders.setContentType(MediaType.APPLICATION_JSON);
+        expectedHeaders.set("Authorization", authToken);
+
+        Map<String, String> expectedBody = new HashMap<>();
+        expectedBody.put("pedidoId", "123");
+        expectedBody.put("clienteId", "456");
+        expectedBody.put("restauranteId", "1234");
+        expectedBody.put("estado", "PENDIENTE");
+
+        HttpEntity<Map<String, String>> expectedEntity = new HttpEntity<>(expectedBody, expectedHeaders);
+
+        when(restTemplate.postForEntity(DomainConstants.URL_SAVE_TRACEABILITY, expectedEntity, Void.class))
+                .thenThrow(new RuntimeException("Timeout"));
 
         // Act & Assert
         assertThrows(RuntimeException.class, () -> {
-            adapter.saveTraceability(idPedido, idCliente, estado);
+            adapter.saveTraceability(idPedido, idCliente, nitRestaurante, estado);
         });
     }
 }

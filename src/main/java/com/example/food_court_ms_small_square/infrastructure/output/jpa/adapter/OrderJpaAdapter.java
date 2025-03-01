@@ -45,7 +45,7 @@ public class OrderJpaAdapter implements IOrderPersistencePort {
         Order mappedOrder = orderEntityMapper.toDomain(orderEntity);
         mappedOrder.setPlatos(orderDishEntityMapper.toDomainList(savedPlatos));
 
-        traceabilityPersistencePort.saveTraceability(mappedOrder.getId(), mappedOrder.getIdCliente(), mappedOrder.getEstado());
+        traceabilityPersistencePort.saveTraceability(mappedOrder.getId(), mappedOrder.getIdCliente(), mappedOrder.getNitRestaurante(), mappedOrder.getIdChef(), mappedOrder.getEstado());
         return mappedOrder;
     }
 
@@ -102,7 +102,7 @@ public class OrderJpaAdapter implements IOrderPersistencePort {
         Order mappedOrder = orderEntityMapper.toDomain(savedOrderEntity);
         mappedOrder.setPlatos(orderDishEntityMapper.toDomainList(orderDishEntities));
 
-        traceabilityPersistencePort.saveTraceability(mappedOrder.getId(), mappedOrder.getIdCliente(), mappedOrder.getEstado());
+        traceabilityPersistencePort.saveTraceability(mappedOrder.getId(), mappedOrder.getIdCliente(), mappedOrder.getNitRestaurante(), mappedOrder.getIdChef(), mappedOrder.getEstado());
         return mappedOrder;
     }
 

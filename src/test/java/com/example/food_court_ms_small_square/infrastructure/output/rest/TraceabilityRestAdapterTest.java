@@ -33,6 +33,8 @@ public class TraceabilityRestAdapterTest {
     public void test_save_traceability_success() {
         Long idPedido = 123L;
         String idCliente = "456";
+        String nitRestaurante = "1234";
+        String idChef = "123";
         String estado = "PENDIENTE";
         String authToken = "Bearer token123";
 
@@ -45,12 +47,14 @@ public class TraceabilityRestAdapterTest {
         Map<String, String> expectedBody = new HashMap<>();
         expectedBody.put("pedidoId", "123");
         expectedBody.put("clienteId", "456");
+        expectedBody.put("restauranteId", "1234");
+        expectedBody.put("chefId", "123");
         expectedBody.put("estado", "PENDIENTE");
 
         HttpEntity<Map<String, String>> expectedEntity = new HttpEntity<>(expectedBody, expectedHeaders);
 
         // Act
-        adapter.saveTraceability(idPedido, idCliente, estado);
+        adapter.saveTraceability(idPedido, idCliente, nitRestaurante, idChef, estado);
 
         // Assert
         verify(restTemplate).postForEntity(
@@ -65,6 +69,8 @@ public class TraceabilityRestAdapterTest {
         // Arrange
         Long idPedido = 123L;
         String idCliente = "456";
+        String nitRestaurante = "1234";
+        String idChef = "123";
         String estado = "PENDIENTE";
         String authToken = "Bearer token123";
 
@@ -77,6 +83,8 @@ public class TraceabilityRestAdapterTest {
         Map<String, String> expectedBody = new HashMap<>();
         expectedBody.put("pedidoId", "123");
         expectedBody.put("clienteId", "456");
+        expectedBody.put("restauranteId", "1234");
+        expectedBody.put("chefId", "123");
         expectedBody.put("estado", "PENDIENTE");
 
         HttpEntity<Map<String, String>> expectedEntity = new HttpEntity<>(expectedBody, expectedHeaders);
@@ -86,7 +94,7 @@ public class TraceabilityRestAdapterTest {
 
         // Act & Assert
         assertThrows(RuntimeException.class, () -> {
-            adapter.saveTraceability(idPedido, idCliente, estado);
+            adapter.saveTraceability(idPedido, idCliente, nitRestaurante, idChef, estado);
         });
     }
 }
