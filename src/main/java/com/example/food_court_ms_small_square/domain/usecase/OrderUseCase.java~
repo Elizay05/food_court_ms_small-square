@@ -115,7 +115,6 @@ public class OrderUseCase implements IOrderServicePort {
         }
 
         order.setEstado(DomainConstants.ORDER_STATUS_DELIVERED);
-
         return orderPersistencePort.updateOrder(order);
     }
 

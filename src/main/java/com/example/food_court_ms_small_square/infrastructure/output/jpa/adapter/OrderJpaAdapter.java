@@ -113,5 +113,6 @@ public class OrderJpaAdapter implements IOrderPersistencePort {
 
         orderDishRepository.deleteByOrden(orderEntity);
         orderRepository.delete(orderEntity);
+        traceabilityPersistencePort.deleteTraceability(orderEntity.getId());
     }
 }

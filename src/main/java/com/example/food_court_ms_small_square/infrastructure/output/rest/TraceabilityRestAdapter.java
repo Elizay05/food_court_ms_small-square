@@ -4,13 +4,12 @@ import com.example.food_court_ms_small_square.domain.spi.ITraceabilityPersistenc
 import com.example.food_court_ms_small_square.domain.util.DomainConstants;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 @RequiredArgsConstructor
 public class TraceabilityRestAdapter implements ITraceabilityPersistencePort {
@@ -38,6 +37,22 @@ public class TraceabilityRestAdapter implements ITraceabilityPersistencePort {
             restTemplate.postForEntity(url, entity, Void.class);
         } catch (Exception e) {
             throw new RuntimeException("Error al guardar la trazabilidad: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void deleteTraceability(Long idPedido) {
+        String url = DomainConstants.URL_DELETE_TRACEABILITY_BY_ORDER_ID.replace("{orderId}", idPedido.toString());
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", request.getHeader("Authorization"));
+
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        try {
+            restTemplate.exchange(url, HttpMethod.DELETE, entity, Void.class);
+        } catch (Exception e) {
+            throw new RuntimeException("Error al eliminar la trazabilidad: " + e.getMessage());
         }
     }
 }
