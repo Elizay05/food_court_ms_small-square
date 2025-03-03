@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.RestTemplate;
 
@@ -95,6 +96,75 @@ public class TraceabilityRestAdapterTest {
         // Act & Assert
         assertThrows(RuntimeException.class, () -> {
             adapter.saveTraceability(idPedido, idCliente, nitRestaurante, idChef, estado);
+        });
+    }
+
+    @Test
+    public void test_delete_traceability_success() {
+        // Arrange
+        Long orderId = 123L;
+        String authToken = "Bearer token123";
+
+        RestTemplate restTemplate = mock(RestTemplate.class);
+        HttpServletRequest request = mock(HttpServletRequest.class);
+
+        when(request.getHeader("Authorization")).thenReturn(authToken);
+
+        TraceabilityRestAdapter traceabilityRestAdapter = new TraceabilityRestAdapter(restTemplate, request);
+
+        String expectedUrl = DomainConstants.URL_DELETE_TRACEABILITY_BY_ORDER_ID.replace("{orderId}", orderId.toString());
+
+        // Act
+        traceabilityRestAdapter.deleteTraceability(orderId);
+
+        // Assert
+        verify(restTemplate).exchange(
+                eq(expectedUrl),
+                eq(HttpMethod.DELETE),
+                any(HttpEntity.class),
+                eq(Void.class)
+        );
+    }
+
+    @Test
+    public void test_delete_traceability_null_order_id() {
+        // Arrange
+        RestTemplate restTemplate = mock(RestTemplate.class);
+        HttpServletRequest request = mock(HttpServletRequest.class);
+
+        TraceabilityRestAdapter traceabilityRestAdapter = new TraceabilityRestAdapter(restTemplate, request);
+
+        // Act & Assert
+        assertThrows(NullPointerException.class, () -> {
+            traceabilityRestAdapter.deleteTraceability(null);
+        });
+    }
+
+    @Test
+    public void test_delete_traceability_network_issue() {
+        // Arrange
+        Long orderId = 123L;
+        String authToken = "Bearer token123";
+
+        RestTemplate restTemplate = mock(RestTemplate.class);
+        HttpServletRequest request = mock(HttpServletRequest.class);
+
+        when(request.getHeader("Authorization")).thenReturn(authToken);
+
+        TraceabilityRestAdapter traceabilityRestAdapter = new TraceabilityRestAdapter(restTemplate, request);
+
+        String expectedUrl = DomainConstants.URL_DELETE_TRACEABILITY_BY_ORDER_ID.replace("{orderId}", orderId.toString());
+
+        doThrow(new RuntimeException("Network error")).when(restTemplate).exchange(
+                eq(expectedUrl),
+                eq(HttpMethod.DELETE),
+                any(HttpEntity.class),
+                eq(Void.class)
+        );
+
+        // Act & Assert
+        assertThrows(RuntimeException.class, () -> {
+            traceabilityRestAdapter.deleteTraceability(orderId);
         });
     }
 }

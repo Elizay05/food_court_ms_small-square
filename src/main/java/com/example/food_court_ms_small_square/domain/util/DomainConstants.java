@@ -6,6 +6,7 @@ public class DomainConstants {
     public static final String URL_GET_PHONE_BY_DOCUMENT = "http://localhost:8080/api/v1/users/getPhoneByDocument/{documentNumber}";
     public static final String URL_SEND_ORDER_READY_MESSAGE = "http://localhost:8082/api/v1/messages/send";
     public static final String URL_SAVE_TRACEABILITY = "http://localhost:8083/api/v1/traceability/register";
+    public static final String URL_DELETE_TRACEABILITY_BY_ORDER_ID = "http://localhost:8083/api/v1/traceability/order/{orderId}";
 
 
     public static final String ORDER_STATUS_PENDING = "PENDIENTE";
